@@ -48,7 +48,8 @@ jobs:
 
     - name: Merge new-branch into main
       run: |
-        git merge new-branch -m "Merge new-branch into main"  # Merge the new branch into the main branch
+        git fetch origin new-branch
+        git merge origin/new-branch -m "Merge new-branch into main"  # Merge the new branch into the main branch
 
     # Push the changes to the main branch
     - name: Push merged changes to main branch
