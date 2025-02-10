@@ -38,34 +38,4 @@ jobs:
         GH_TOKEN: ${{ secrets.GH_TOKEN }} # Reference the stored secret
       run: |
         git remote set-url origin https://github-actions:${{ secrets.GH_TOKEN }}@github.com/anney1/github-action-repo.git
-        git push origin new-branch || echo "Push failed due to a possible conflict"
-
-    # Checkout the main branch and merge new-branch into it
-    - name: Checkout main branch
-      run: |
-        git checkout main
-        git pull origin main  # Pull the latest changes from the main branch
-
-    # Fetch the latest changes from new-branch before merging
-    - name: Fetch latest changes from new-branch
-      run: |
-        git fetch origin new-branch
-
-    - name: Merge new-branch into main
-      run: |
-        git merge origin/new-branch --allow-unrelated-histories -m "Merge new-branch into main"  # Merge with unrelated histories
-
-    # Check for merge conflicts and abort if any conflicts exist
-    - name: Check for merge conflicts
-      run: |
-        if git ls-files -u | grep -q .; then
-          echo "Merge conflict detected! Please resolve the conflicts manually.";
-          exit 1;
-        fi
-
-    # Push the changes to the main branch
-    - name: Push merged changes to main branch
-      env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }} # Reference the stored secret
-      run: |
-        git push origin main  # Push the merged changes to the main branch
+        git push origin new-branch # Push the changes to the new branch
