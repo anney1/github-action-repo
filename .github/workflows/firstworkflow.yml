@@ -14,10 +14,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    # Set up Git
+    - name: Set up Git
+      run: |
+        git config --global user.name "Your Name"
+        git config --global user.email "your.email@example.com"
+
     # Create a new branch
     - name: Create new branch
       run: |
-        git checkout -b Dev # Replace with your desired branch name
+        git checkout -b new-branch # Replace with your desired branch name
 
     # Make a simple change (e.g., creating a new file)
     - name: Create a new file
@@ -29,4 +35,4 @@ jobs:
     # Push the changes to the new branch
     - name: Push changes to new branch
       run: |
-        git push origin Dev # Push the changes to the new branch
+        git push origin new-branch # Push the changes to the new branch
