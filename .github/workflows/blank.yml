@@ -38,7 +38,7 @@ jobs:
         GH_TOKEN: ${{ secrets.GH_TOKEN }} # Reference the stored secret
       run: |
         git remote set-url origin https://github-actions:${{ secrets.GH_TOKEN }}@github.com/anney1/github-action-repo.git
-        git push origin new-branch # Push the changes to the new branch
+        git push origin new-branch || echo "Push failed due to a possible conflict"
 
     # Checkout the main branch and merge new-branch into it
     - name: Checkout main branch
@@ -46,9 +46,13 @@ jobs:
         git checkout main
         git pull origin main  # Pull the latest changes from the main branch
 
-    - name: Merge new-branch into main
+    # Fetch the latest changes from new-branch before merging
+    - name: Fetch latest changes from new-branch
       run: |
         git fetch origin new-branch
+
+    - name: Merge new-branch into main
+      run: |
         git merge origin/new-branch -m "Merge new-branch into main"  # Merge the new branch into the main branch
 
     # Push the changes to the main branch
