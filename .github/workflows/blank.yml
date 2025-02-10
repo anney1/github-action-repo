@@ -55,6 +55,14 @@ jobs:
       run: |
         git merge origin/new-branch --allow-unrelated-histories -m "Merge new-branch into main"  # Merge with unrelated histories
 
+    # Check for merge conflicts and abort if any conflicts exist
+    - name: Check for merge conflicts
+      run: |
+        if git ls-files -u | grep -q .; then
+          echo "Merge conflict detected! Please resolve the conflicts manually.";
+          exit 1;
+        fi
+
     # Push the changes to the main branch
     - name: Push merged changes to main branch
       env:
