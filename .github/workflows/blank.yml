@@ -39,3 +39,20 @@ jobs:
       run: |
         git remote set-url origin https://github-actions:${{ secrets.GH_TOKEN }}@github.com/anney1/github-action-repo.git
         git push origin new-branch # Push the changes to the new branch
+
+    # Checkout the main branch and merge new-branch into it
+    - name: Checkout main branch
+      run: |
+        git checkout main
+        git pull origin main  # Pull the latest changes from the main branch
+
+    - name: Merge new-branch into main
+      run: |
+        git merge new-branch -m "Merge new-branch into main"  # Merge the new branch into the main branch
+
+    # Push the changes to the main branch
+    - name: Push merged changes to main branch
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }} # Reference the stored secret
+      run: |
+        git push origin main  # Push the merged changes to the main branch
