@@ -32,7 +32,10 @@ jobs:
         git add new-file.txt
         git commit -m "Add new file"
 
-    # Push the changes to the new branch
+    # Push the changes to the new branch using the GitHub Personal Access Token
     - name: Push changes to new branch
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }} # Reference the stored secret
       run: |
+        git remote set-url origin https://github-actions:${{ secrets.GH_TOKEN }}@github.com/anney1/github-action-repo.git
         git push origin new-branch # Push the changes to the new branch
