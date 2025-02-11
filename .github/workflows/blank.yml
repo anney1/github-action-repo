@@ -1,22 +1,29 @@
 name: export-and-branch-solution
 
+# Export solution from DEV environment
+# Unpack it and prepare, commit, and push a git branch with the changes
+
 on:
   workflow_dispatch:
     inputs:
       solution_name:
-        description: 'name of the solution to worked on from Power Platform'
+        description: 'Name of the solution to work on from Power Platform'
         required: true
         default: ALMLab
+
+      # Do Not change these values
       solution_exported_folder:
-        description: 'folder name for staging the exported solution *do not change*'
+        description: 'Folder name for staging the exported solution *do not change*'
         required: true
         default: out/exported/
+
       solution_folder:
-        description: 'staging the unpacked solution folder before check-in *do not change*'
+        description: 'Staging the unpacked solution folder before check-in *do not change*'
         required: true
         default: out/solutions/
+
       solution_target_folder:
-        description: 'folder name to be created and checked in *do not change*'
+        description: 'Folder name to be created and checked in *do not change*'
         required: true
         default: solutions/
 
@@ -31,55 +38,47 @@ permissions:
 jobs:
   export-from-dev:
     runs-on: windows-latest
+
     env:
       RUNNER_DEBUG: 1
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout Repository
+      uses: actions/checkout@v2
       with:
         lfs: true
 
-    # Install Power Apps CLI manually
+    - name: Install Node.js (if not installed)
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'  # Use a supported Node.js version
+
     - name: Install Power Apps CLI (PAC)
       run: |
-        # Set the URL for the Power Apps CLI ZIP
-        $url = "https://github.com/Microsoft/PowerApps-cli/releases/download/v1.0.0/pac-cli-win-x64.zip"
-        $output = "pac-cli.zip"
-        
-        # Download the zip file
-        Invoke-WebRequest -Uri $url -OutFile $output
-        
-        # Extract the zip file
-        Expand-Archive -Path $output -DestinationPath "$env:USERPROFILE\pac-cli"
-        
-        # Add to system PATH so that PAC can be recognized in the environment
-        $env:PATH += ";$env:USERPROFILE\pac-cli\pac"
-        
-        # Verify PAC installation
-        pac --version
+        npm install -g pac
+        pac --version  # Verify the installation
 
-    # who-am-i action for Power Platform authentication
     - name: who-am-i action
       uses: microsoft/powerplatform-actions/who-am-i@v1
       with:
-        environment-url: ${{env.ENVIRONMENT_URL}}
-        app-id: ${{env.CLIENT_ID}}
+        environment-url: ${{ env.ENVIRONMENT_URL }}
+        app-id: ${{ env.CLIENT_ID }}
         client-secret: ${{ secrets.PowerPlatformSPN }}
-        tenant-id: ${{env.TENANT_ID}}
+        tenant-id: ${{ env.TENANT_ID }}
         cloud: Public
 
     - name: export-solution action
-      uses: microsoft/powerplatform-actions/export-solution@v1
+      uses: microsoft/powerplatform-actions/export-solution@v0
       with:
-        environment-url: ${{env.ENVIRONMENT_URL}}
-        app-id: ${{env.CLIENT_ID}}
+        environment-url: ${{ env.ENVIRONMENT_URL }}
+        app-id: ${{ env.CLIENT_ID }}
         client-secret: ${{ secrets.PowerPlatformSPN }}
-        tenant-id: ${{env.TENANT_ID}}
+        tenant-id: ${{ env.TENANT_ID }}
         solution-name: ${{ github.event.inputs.solution_name }}
         solution-output-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
 
     - name: unpack-solution action
-      uses: microsoft/powerplatform-actions/unpack-solution@v1
+      uses: microsoft/powerplatform-actions/unpack-solution@v0
       with:
         solution-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
         solution-folder: ${{ github.event.inputs.solution_folder}}/${{ github.event.inputs.solution_name }}
@@ -87,7 +86,7 @@ jobs:
         overwrite-files: true
 
     - name: branch-solution, prepare it for a PullRequest
-      uses: microsoft/powerplatform-actions/branch-solution@v1
+      uses: microsoft/powerplatform-actions/branch-solution@v0
       with:
         solution-folder: ${{ github.event.inputs.solution_folder}}/${{ github.event.inputs.solution_name }}
         solution-target-folder: ${{ github.event.inputs.solution_target_folder}}/${{ github.event.inputs.solution_name }}
