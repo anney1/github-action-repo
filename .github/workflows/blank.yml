@@ -1,41 +1,83 @@
-name: Create and Push to New Branch
+name: export-and-branch-solution
+
+# Export solution from DEV environment
+# unpack it and prepare, commit and push a git branch with the changes
 
 on:
-  push:
-    branches:
-      - main # Trigger the workflow when there is a push to the main branch.
+  workflow_dispatch:
+    inputs:
+      solution_name:
+        description: 'name of the solution to worked on from Power Platform'
+        required: true
+        default: ALMLab
+
+      # Do Not change these values
+      solution_exported_folder:
+        description: 'folder name for staging the exported solution *do not change*'
+        required: true
+        default: out/exported/
+
+      solution_folder:
+        description: 'staging the unpacked solution folder before check-in *do not change*'
+        required: true
+        default: out/solutions/
+
+      solution_target_folder:
+        description: 'folder name to be created and checked in *do not change*'
+        required: true
+        default: solutions/
+
+env:
+  ENVIRONMENT_URL: 'https://org41c53d90.crm4.dynamics.com'
+  CLIENT_ID: 'c37f4956-70a3-4e74-a2d2-225b579d1a21'
+  TENANT_ID: '302edaf0-65d6-449a-a796-b83cfb733f0d'
+
+permissions:
+  contents: write
 
 jobs:
-  create-branch-and-push:
-    runs-on: ubuntu-latest
+  export-from-dev:
+    runs-on: windows-latest
+
+    env:
+      RUNNER_DEBUG: 1
 
     steps:
-    # Check out the code from the repository
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v2
+      with:
+        lfs: true
 
-    # Set up Git
-    - name: Set up Git
-      run: |
-        git config --global user.name "Faiza Riaz"
-        git config --global user.email "faiza.riaz10@gmail.com"
+    - name: who-am-i action
+      uses: microsoft/powerplatform-actions/who-am-i@v0
+      with:
+        environment-url: ${{env.ENVIRONMENT_URL}}
+        app-id: ${{env.CLIENT_ID}}
+        client-secret: ${{ secrets.PowerPlatformSPN }}
+        tenant-id: ${{env.TENANT_ID}}
 
-    # Create a new branch
-    - name: Create new branch
-      run: |
-        git checkout -b new-branch # Replace with your desired branch name
+    - name: export-solution action
+      uses: microsoft/powerplatform-actions/export-solution@v0
+      with:
+        environment-url: ${{env.ENVIRONMENT_URL}}
+        app-id: ${{env.CLIENT_ID}}
+        client-secret: ${{ secrets.PowerPlatformSPN }}
+        tenant-id: ${{env.TENANT_ID}}
+        solution-name: ${{ github.event.inputs.solution_name }}
+        solution-output-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
 
-    # Make a simple change (e.g., creating a new file)
-    - name: Create a new file
-      run: |
-        echo "This is a new file created on a new branch" > new-file.txt
-        git add new-file.txt
-        git commit -m "Add new file"
+    - name: unpack-solution action
+      uses: microsoft/powerplatform-actions/unpack-solution@v0
+      with:
+        solution-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
+        solution-folder: ${{ github.event.inputs.solution_folder}}/${{ github.event.inputs.solution_name }}
+        solution-type: 'Unmanaged'
+        overwrite-files: true
 
-    # Push the changes to the new branch using the GitHub Personal Access Token
-    - name: Push changes to new branch
-      env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }} # Reference the stored secret
-      run: |
-        git remote set-url origin https://github-actions:${{ secrets.GH_TOKEN }}@github.com/anney1/github-action-repo.git
-        git push origin new-branch # Push the changes to the new branch
+    - name: branch-solution, prepare it for a PullRequest
+      uses: microsoft/powerplatform-actions/branch-solution@v0
+      with:
+        solution-folder: ${{ github.event.inputs.solution_folder}}/${{ github.event.inputs.solution_name }}
+        solution-target-folder: ${{ github.event.inputs.solution_target_folder}}/${{ github.event.inputs.solution_name }}
+        repo-token: ${{ secrets.GH_TOKEN }}
+        allow-empty-commit: true
+
