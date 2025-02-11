@@ -38,16 +38,22 @@ jobs:
       with:
         lfs: true
 
-    - name: Setup Power Platform CLI
-      uses: microsoft/powerplatform-actions/setup-pac@v1  # Ensure you use this action
+    - name: Install Power Platform CLI
+      shell: pwsh
+      run: |
+        Install-Module -Name Microsoft.PowerApps.Administration.PowerShell -Force -AllowClobber
+        Install-Module -Name Microsoft.PowerApps.PowerShell -Force -AllowClobber
+        Install-Module -Name Microsoft.PowerPlatform.Cds.Client -Force -AllowClobber
+        $env:Path += ";C:\Program Files\WindowsPowerShell\Modules\Microsoft.PowerApps.Administration.PowerShell"
+        $env:Path += ";C:\Program Files\WindowsPowerShell\Modules\Microsoft.PowerApps.PowerShell"
 
-    - name: who-am-i action
-      uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
-      with:
-        environment-url: ${{env.ENVIRONMENT_URL}}
-        app-id: ${{env.CLIENT_ID}}
-        client-secret: ${{ secrets.PowerPlatformSPN }}
-        tenant-id: ${{env.TENANT_ID}}
+    # - name: who-am-i action
+    #   uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
+    #   with:
+    #     environment-url: ${{env.ENVIRONMENT_URL}}
+    #     app-id: ${{env.CLIENT_ID}}
+    #     client-secret: ${{ secrets.PowerPlatformSPN }}
+    #     tenant-id: ${{env.TENANT_ID}}
 
     - name: export-solution action
       uses: microsoft/powerplatform-actions/export-solution@v1  # Use latest available version
