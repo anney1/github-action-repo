@@ -39,7 +39,9 @@ jobs:
         lfs: true
 
     - name: Install Power Platform CLI
-      run: npm install -g pac-cli
+      run: |
+        Invoke-WebRequest -Uri https://aka.ms/powerplatform-vscode -OutFile powerplatform-vscode.msi
+        Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
 
     - name: who-am-i action
       uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
