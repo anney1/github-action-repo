@@ -39,12 +39,7 @@ jobs:
         lfs: true
 
     - name: Setup Power Platform CLI
-      uses: microsoft/powerplatform-actions/setup@v1  # Use latest available version
-      with:
-        environment-url: ${{env.ENVIRONMENT_URL}}
-        app-id: ${{env.CLIENT_ID}}
-        client-secret: ${{ secrets.PowerPlatformSPN }}
-        tenant-id: ${{env.TENANT_ID}}
+      uses: microsoft/powerplatform-cli-action/setup@v1  # Use latest available version
 
     - name: who-am-i action
       uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
