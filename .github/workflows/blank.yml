@@ -38,42 +38,50 @@ jobs:
       with:
         lfs: true
 
-    # - name: Setup Node.js
-    #   uses: actions/setup-node@v2
-    #   with:
-    #     node-version: '14'  # Ensure you use the required Node.js version
-
+    # Step 1: Install Power Apps CLI manually using PowerShell
     - name: Install Power Apps CLI (PAC)
-      uses: microsoft/powerplatform-actions/install-pac@v1   
-       
-    # - name: who-am-i action
-    #   uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
-    #   with:
-    #     environment-url: ${{env.ENVIRONMENT_URL}}
-    #     app-id: ${{env.CLIENT_ID}}
-    #     client-secret: ${{ secrets.PowerPlatformSPN }}
-    #     tenant-id: ${{env.TENANT_ID}}
+      run: |
+        # Download and install Power Apps CLI
+        Invoke-WebRequest -Uri "https://aka.ms/install-powerapps-cli" -OutFile "install-pac.ps1"
+        Set-ExecutionPolicy Bypass -Scope Process -Force
+        .\install-pac.ps1
 
-    - name: export-solution action
-      uses: microsoft/powerplatform-actions/export-solution@v1  # Use latest available version
+    # Step 2: Verify Power Apps CLI (PAC) installation
+    - name: Verify PAC Version
+      run: pac --version
+
+    # Step 3: Authenticate with Power Platform using 'who-am-i' action
+    # - name: Who Am I Action (authenticate with Power Platform)
+    #   uses: microsoft/powerplatform-actions/who-am-i@v1
+    #   with:
+    #     environment-url: ${{ env.ENVIRONMENT_URL }}
+    #     app-id: ${{ env.CLIENT_ID }}
+    #     client-secret: ${{ secrets.PowerPlatformSPN }}
+    #     tenant-id: ${{ env.TENANT_ID }}
+
+    # Step 4: Export Solution using Power Platform action
+    - name: Export Solution Action
+      uses: microsoft/powerplatform-actions/export-solution@v1
       with:
-        environment-url: ${{env.ENVIRONMENT_URL}}
-        app-id: ${{env.CLIENT_ID}}
+        environment-url: ${{ env.ENVIRONMENT_URL }}
+        app-id: ${{ env.CLIENT_ID }}
         client-secret: ${{ secrets.PowerPlatformSPN }}
-        tenant-id: ${{env.TENANT_ID}}
+        tenant-id: ${{ env.TENANT_ID }}
         solution-name: ${{ github.event.inputs.solution_name }}
         solution-output-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
 
-    - name: unpack-solution action
-      uses: microsoft/powerplatform-actions/unpack-solution@v1  # Use latest available version
+    # Step 5: Unpack the Solution
+    - name: Unpack Solution Action
+      uses: microsoft/powerplatform-actions/unpack-solution@v1
       with:
         solution-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
         solution-folder: ${{ github.event.inputs.solution_folder}}/${{ github.event.inputs.solution_name }}
         solution-type: 'Unmanaged'
         overwrite-files: true
 
-    - name: branch-solution, prepare it for a PullRequest
-      uses: microsoft/powerplatform-actions/branch-solution@v1  # Use latest available version
+    # Step 6: Prepare Solution for Pull Request
+    - name: Branch Solution, Prepare for PullRequest
+      uses: microsoft/powerplatform-actions/branch-solution@v1
       with:
         solution-folder: ${{ github.event.inputs.solution_folder}}/${{ github.event.inputs.solution_name }}
         solution-target-folder: ${{ github.event.inputs.solution_target_folder}}/${{ github.event.inputs.solution_name }}
