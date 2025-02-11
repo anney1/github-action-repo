@@ -40,8 +40,8 @@ jobs:
 
     - name: Install Power Platform CLI
       run: |
-        Invoke-WebRequest -Uri https://aka.ms/powerplatform-vscode -OutFile powerplatform-vscode.msi
-        Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
+        Install-Module -Name Microsoft.PowerPlatform.Cds.Client -Force -AllowClobber
+        Import-Module Microsoft.PowerPlatform.Cds.Client
 
     - name: who-am-i action
       uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
