@@ -52,23 +52,23 @@ jobs:
     #     client-secret: ${{ secrets.PowerPlatformSPN }}
     #     tenant-id: ${{env.TENANT_ID}}
 
-    - name: export-solution action
-      uses: microsoft/powerplatform-actions/export-solution@v1  # Use latest available version
-      with:
-        environment-url: ${{env.ENVIRONMENT_URL}}
-        app-id: ${{env.CLIENT_ID}}
-        client-secret: ${{ secrets.PowerPlatformSPN }}
-        tenant-id: ${{env.TENANT_ID}}
-        solution-name: ${{ github.event.inputs.solution_name }}
-        solution-output-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
+    # - name: export-solution action
+    #   uses: microsoft/powerplatform-actions/export-solution@v1  # Use latest available version
+    #   with:
+    #     environment-url: ${{env.ENVIRONMENT_URL}}
+    #     app-id: ${{env.CLIENT_ID}}
+    #     client-secret: ${{ secrets.PowerPlatformSPN }}
+    #     tenant-id: ${{env.TENANT_ID}}
+    #     solution-name: ${{ github.event.inputs.solution_name }}
+    #     solution-output-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
 
-    - name: unpack-solution action
-      uses: microsoft/powerplatform-actions/unpack-solution@v1  # Use latest available version
-      with:
-        solution-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
-        solution-folder: ${{ github.event.inputs.solution_folder}}/${{ github.event.inputs.solution_name }}
-        solution-type: 'Unmanaged'
-        overwrite-files: true
+    # - name: unpack-solution action
+    #   uses: microsoft/powerplatform-actions/unpack-solution@v1  # Use latest available version
+    #   with:
+    #     solution-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
+    #     solution-folder: ${{ github.event.inputs.solution_folder}}/${{ github.event.inputs.solution_name }}
+    #     solution-type: 'Unmanaged'
+    #     overwrite-files: true
 
     - name: branch-solution, prepare it for a PullRequest
       uses: microsoft/powerplatform-actions/branch-solution@v1  # Use latest available version
