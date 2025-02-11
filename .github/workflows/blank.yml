@@ -39,10 +39,10 @@ jobs:
         lfs: true
 
     - name: Install Power Platform CLI
-      shell: pwsh
       run: |
-        Install-Module -Name Microsoft.PowerPlatform.Cds.Client -Force -AllowClobber
-        Import-Module Microsoft.PowerPlatform.Cds.Client
+        Invoke-WebRequest -Uri https://aka.ms/powerplatform-vscode -OutFile powerplatform-vscode.msi
+        Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
+        $env:Path += ";C:\Program Files\WindowsPowerShell\Modules"
 
     # - name: who-am-i action
     #   uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
