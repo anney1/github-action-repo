@@ -38,8 +38,8 @@ jobs:
       with:
         lfs: true
 
-    - name: Setup Power Platform CLI
-      uses: microsoft/powerplatform-cli-action/setup@v1  # Use latest available version
+    - name: Install Power Platform CLI
+      run: npm install -g pac-cli
 
     - name: who-am-i action
       uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
