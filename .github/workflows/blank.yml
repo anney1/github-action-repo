@@ -39,19 +39,23 @@ jobs:
       with:
         lfs: true
 
-    # Step to install Power Apps CLI via MSI
-    - name: Install Power Apps CLI via MSI
+    # Install Power Apps CLI (PAC) using MSI
+    - name: Install Power Apps CLI
       run: |
         Invoke-WebRequest -Uri "https://aka.ms/download-powerapps-cli" -OutFile "PowerAppsCLI.msi"
         Start-Process msiexec.exe -ArgumentList "/i", "PowerAppsCLI.msi", "/quiet", "/norestart" -Wait
         Remove-Item -Force "PowerAppsCLI.msi"
 
-    # Verify PAC installation by checking version
+    # Verify PAC installation
     - name: Verify PAC installation
       run: |
-        pac --version
-        if ($?) { Write-Host "Power Apps CLI installed successfully" }
-        else { Write-Host "Power Apps CLI installation failed" }
+        $pacPath = Get-Command pac -ErrorAction SilentlyContinue
+        if ($pacPath) {
+          Write-Host "Power Apps CLI installed successfully."
+        } else {
+          Write-Host "Power Apps CLI installation failed."
+          exit 1
+        }
 
     # Proceed with the who-am-i action only if PAC is installed
     - name: who-am-i action
