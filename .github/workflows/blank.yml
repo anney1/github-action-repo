@@ -46,13 +46,13 @@ jobs:
     - name: Install Power Apps CLI (PAC)
       uses: microsoft/powerplatform-actions/install-pac@v1   
        
-    - name: who-am-i action
-      uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
-      with:
-        environment-url: ${{env.ENVIRONMENT_URL}}
-        app-id: ${{env.CLIENT_ID}}
-        client-secret: ${{ secrets.PowerPlatformSPN }}
-        tenant-id: ${{env.TENANT_ID}}
+    # - name: who-am-i action
+    #   uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
+    #   with:
+    #     environment-url: ${{env.ENVIRONMENT_URL}}
+    #     app-id: ${{env.CLIENT_ID}}
+    #     client-secret: ${{ secrets.PowerPlatformSPN }}
+    #     tenant-id: ${{env.TENANT_ID}}
 
     - name: export-solution action
       uses: microsoft/powerplatform-actions/export-solution@v1  # Use latest available version
