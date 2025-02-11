@@ -39,11 +39,12 @@ jobs:
       with:
         lfs: true
 
-    # Step to install Power Apps CLI directly from Microsoft's official website
-    - name: Install Power Apps CLI
+    # Step to install Power Apps CLI from MSI Installer
+    - name: Install Power Apps CLI via MSI
       run: |
-        Invoke-WebRequest -Uri "https://aka.ms/install-powerapps-cli" -OutFile "install-pac.ps1"
-        .\install-pac.ps1
+        Invoke-WebRequest -Uri "https://aka.ms/download-powerapps-cli" -OutFile "PowerAppsCLI.msi"
+        Start-Process msiexec.exe -ArgumentList "/i", "PowerAppsCLI.msi", "/quiet", "/norestart" -Wait
+        Remove-Item -Force "PowerAppsCLI.msi"
 
     - name: who-am-i action
       uses: microsoft/powerplatform-actions/who-am-i@v1
