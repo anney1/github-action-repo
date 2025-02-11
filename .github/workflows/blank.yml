@@ -39,12 +39,11 @@ jobs:
       with:
         lfs: true
 
-    # Step to install Power Apps CLI using Chocolatey
+    # Step to install Power Apps CLI directly from Microsoft's official website
     - name: Install Power Apps CLI
       run: |
-        Set-ExecutionPolicy Bypass -Scope Process -Force; 
-        Invoke-WebRequest -Uri https://community.chocolatey.org/api/v2/package/powerapps-cli -OutFile powerapps-cli.nupkg;
-        choco install ./powerapps-cli.nupkg -y
+        Invoke-WebRequest -Uri "https://aka.ms/install-powerapps-cli" -OutFile "install-pac.ps1"
+        .\install-pac.ps1
 
     - name: who-am-i action
       uses: microsoft/powerplatform-actions/who-am-i@v1
