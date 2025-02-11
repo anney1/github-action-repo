@@ -39,20 +39,20 @@ jobs:
       with:
         lfs: true
 
-    # Install Power Apps CLI (PAC) via direct download and setup
+    # Install Power Apps CLI (PAC) via Chocolatey package manager
     - name: Install Power Apps CLI
       run: |
-        # Download PAC Installer
-        Invoke-WebRequest -Uri "https://aka.ms/download-powerapps-cli" -OutFile "PowerAppsCLI.zip"
-        Expand-Archive -Path "PowerAppsCLI.zip" -DestinationPath "$env:ProgramFiles\PowerAppsCLI"
+        # Install Chocolatey (if it's not installed already)
+        Set-ExecutionPolicy Bypass -Scope Process -Force; 
+        Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')
 
-        # Add PAC to PATH
-        $env:PATH += ";$env:ProgramFiles\PowerAppsCLI"
+        # Install PAC (Power Apps CLI) via Chocolatey
+        choco install microsoft-powerapps-cli -y
 
-        # Verify if PAC is installed
+        # Verify PAC installation
         pac --version
 
-    # Proceed with the who-am-i action only if PAC is installed
+    # who-am-i action for Power Platform authentication
     - name: who-am-i action
       uses: microsoft/powerplatform-actions/who-am-i@v1
       with:
