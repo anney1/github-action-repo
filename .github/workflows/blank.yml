@@ -44,6 +44,11 @@ jobs:
         Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
         $env:Path += ";C:\Program Files\WindowsPowerShell\Modules"
 
+    - name: Configure Git user
+      run: |
+        git config --global user.email "faiza.riaz10@gmail.com"
+        git config --global user.name "Faiza Riaz"
+
     - name: Create a new file
       run: |
         echo "Make a simple change (e.g., creating a new file)" > workflowfile.txt
