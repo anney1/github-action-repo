@@ -4,19 +4,19 @@ on:
   workflow_dispatch:
     inputs:
       solution_name:
-        description: 'name of the solution to worked on from Power Platform'
+        description: 'Name of the solution to work on from Power Platform'
         required: true
         default: ALMLab
       solution_exported_folder:
-        description: 'folder name for staging the exported solution *do not change*'
+        description: 'Folder name for staging the exported solution *do not change*'
         required: true
         default: out/exported/
       solution_folder:
-        description: 'staging the unpacked solution folder before check-in *do not change*'
+        description: 'Staging the unpacked solution folder before check-in *do not change*'
         required: true
         default: out/solutions/
       solution_target_folder:
-        description: 'folder name to be created and checked in *do not change*'
+        description: 'Folder name to be created and checked in *do not change*'
         required: true
         default: solutions/
 
@@ -37,6 +37,14 @@ jobs:
     - uses: actions/checkout@v3  # Use the latest version of checkout action
       with:
         lfs: true
+
+    - name: Setup Power Platform CLI
+      uses: microsoft/powerplatform-actions/setup@v1  # Use latest available version
+      with:
+        environment-url: ${{env.ENVIRONMENT_URL}}
+        app-id: ${{env.CLIENT_ID}}
+        client-secret: ${{ secrets.PowerPlatformSPN }}
+        tenant-id: ${{env.TENANT_ID}}
 
     - name: who-am-i action
       uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
