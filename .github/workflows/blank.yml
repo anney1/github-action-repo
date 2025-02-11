@@ -1,8 +1,5 @@
 name: export-and-branch-solution
 
-# Export solution from DEV environment
-# unpack it and prepare, commit and push a git branch with the changes
-
 on:
   workflow_dispatch:
     inputs:
@@ -10,18 +7,14 @@ on:
         description: 'name of the solution to worked on from Power Platform'
         required: true
         default: ALMLab
-
-      # Do Not change these values
       solution_exported_folder:
         description: 'folder name for staging the exported solution *do not change*'
         required: true
         default: out/exported/
-
       solution_folder:
         description: 'staging the unpacked solution folder before check-in *do not change*'
         required: true
         default: out/solutions/
-
       solution_target_folder:
         description: 'folder name to be created and checked in *do not change*'
         required: true
@@ -38,17 +31,15 @@ permissions:
 jobs:
   export-from-dev:
     runs-on: windows-latest
-
     env:
       RUNNER_DEBUG: 1
-
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3  # Use the latest version of checkout action
       with:
         lfs: true
 
     - name: who-am-i action
-      uses: microsoft/powerplatform-actions/who-am-i@v0
+      uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
       with:
         environment-url: ${{env.ENVIRONMENT_URL}}
         app-id: ${{env.CLIENT_ID}}
@@ -56,7 +47,7 @@ jobs:
         tenant-id: ${{env.TENANT_ID}}
 
     - name: export-solution action
-      uses: microsoft/powerplatform-actions/export-solution@v0
+      uses: microsoft/powerplatform-actions/export-solution@v1  # Use latest available version
       with:
         environment-url: ${{env.ENVIRONMENT_URL}}
         app-id: ${{env.CLIENT_ID}}
@@ -66,7 +57,7 @@ jobs:
         solution-output-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
 
     - name: unpack-solution action
-      uses: microsoft/powerplatform-actions/unpack-solution@v0
+      uses: microsoft/powerplatform-actions/unpack-solution@v1  # Use latest available version
       with:
         solution-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
         solution-folder: ${{ github.event.inputs.solution_folder}}/${{ github.event.inputs.solution_name }}
@@ -74,7 +65,7 @@ jobs:
         overwrite-files: true
 
     - name: branch-solution, prepare it for a PullRequest
-      uses: microsoft/powerplatform-actions/branch-solution@v0
+      uses: microsoft/powerplatform-actions/branch-solution@v1  # Use latest available version
       with:
         solution-folder: ${{ github.event.inputs.solution_folder}}/${{ github.event.inputs.solution_name }}
         solution-target-folder: ${{ github.event.inputs.solution_target_folder}}/${{ github.event.inputs.solution_name }}
