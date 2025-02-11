@@ -38,8 +38,15 @@ jobs:
       with:
         lfs: true
 
-    - name: Setup Power Platform CLI
-      uses: microsoft/powerplatform-actions/setup-pac@v1  # Ensure you use this action
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'  # Ensure you use the required Node.js version
+
+    - name: Install Power Platform CLI
+      run: |
+        npm install -g @microsoft/powerplatform-cli
+        echo "##[add-path]$HOME/.npm-global/bin"  # Ensure CLI is available in PATH
 
     # - name: who-am-i action
     #   uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
