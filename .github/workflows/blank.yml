@@ -44,6 +44,18 @@ jobs:
         Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
         $env:Path += ";C:\Program Files\WindowsPowerShell\Modules"
 
+    - name: Create a new file
+      run: |
+        echo "Make a simple change (e.g., creating a new file)" > workflowfile.txt
+        git add workflowfile.txt
+        git commit -m "Add new file"
+
+    - name: Push changes to new branch
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Reference the stored secret
+      run: |
+        git remote set-url origin https://github-actions:${{ secrets.GH_TOKEN }}@github.com/anney1/github-action-repo.git
+        git push origin main  # Push the changes to the main branch
     # - name: who-am-i action
     #   uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
     #   with:
@@ -78,19 +90,4 @@ jobs:
     #     repo-token: ${{ secrets.GH_TOKEN }}
     #     allow-empty-commit: true
     
-
-    # Make a simple change (e.g., creating a new file)
-    - name: Create a new file
-      run: |
-        echo "Make a simple change (e.g., creating a new file)
-    - name: Create a new file" > workflowfile.txt
-        git add new-file.txt
-        git commit -m "Add new file"
-
-    # Push the changes to the new branch using the GitHub Personal Access Token
-    - name: Push changes to new branch
-      env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }} # Reference the stored secret
-      run: |
-        git remote set-url origin https://github-actions:${{ secrets.GH_TOKEN }}@github.com/anney1/github-action-repo.git
-        git push origin main # Push the changes to the main branch
+   
