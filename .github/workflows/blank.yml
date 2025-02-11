@@ -33,21 +33,28 @@ jobs:
     runs-on: windows-latest
     env:
       RUNNER_DEBUG: 1
+
     steps:
-    - uses: actions/checkout@v3  # Use the latest version of checkout action
+    - uses: actions/checkout@v3
       with:
         lfs: true
 
+    # Step to install Power Apps CLI (PAC)
+    - name: Install Power Apps CLI
+      run: |
+        iex ((New-Object System.Net.WebClient).DownloadString('https://aka.ms/install-powerapps-cli'))
+
     - name: who-am-i action
-      uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
+      uses: microsoft/powerplatform-actions/who-am-i@v1
       with:
         environment-url: ${{env.ENVIRONMENT_URL}}
         app-id: ${{env.CLIENT_ID}}
         client-secret: ${{ secrets.PowerPlatformSPN }}
         tenant-id: ${{env.TENANT_ID}}
+        cloud: Public
 
     - name: export-solution action
-      uses: microsoft/powerplatform-actions/export-solution@v1  # Use latest available version
+      uses: microsoft/powerplatform-actions/export-solution@v1
       with:
         environment-url: ${{env.ENVIRONMENT_URL}}
         app-id: ${{env.CLIENT_ID}}
@@ -56,18 +63,4 @@ jobs:
         solution-name: ${{ github.event.inputs.solution_name }}
         solution-output-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
 
-    - name: unpack-solution action
-      uses: microsoft/powerplatform-actions/unpack-solution@v1  # Use latest available version
-      with:
-        solution-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
-        solution-folder: ${{ github.event.inputs.solution_folder}}/${{ github.event.inputs.solution_name }}
-        solution-type: 'Unmanaged'
-        overwrite-files: true
-
-    - name: branch-solution, prepare it for a PullRequest
-      uses: microsoft/powerplatform-actions/branch-solution@v1  # Use latest available version
-      with:
-        solution-folder: ${{ github.event.inputs.solution_folder}}/${{ github.event.inputs.solution_name }}
-        solution-target-folder: ${{ github.event.inputs.solution_target_folder}}/${{ github.event.inputs.solution_name }}
-        repo-token: ${{ secrets.GH_TOKEN }}
-        allow-empty-commit: true
+    - name: unpack-solution ac
