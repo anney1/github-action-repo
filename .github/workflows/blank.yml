@@ -42,8 +42,8 @@ jobs:
     # Install Power Apps CLI manually
     - name: Install Power Apps CLI (PAC)
       run: |
-        # Download the latest Power Apps CLI release from GitHub
-        $url = "https://github.com/microsoft/PowerApps-cli/releases/latest/download/pac-cli-win-x64.zip"
+        # Set the URL for the Power Apps CLI ZIP
+        $url = "https://github.com/Microsoft/PowerApps-cli/releases/download/v1.0.0/pac-cli-win-x64.zip"
         $output = "pac-cli.zip"
         
         # Download the zip file
