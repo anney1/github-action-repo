@@ -41,11 +41,8 @@ jobs:
     - name: Install Power Platform CLI
       shell: pwsh
       run: |
-        Install-Module -Name Microsoft.PowerApps.Administration.PowerShell -Force -AllowClobber
-        Install-Module -Name Microsoft.PowerApps.PowerShell -Force -AllowClobber
         Install-Module -Name Microsoft.PowerPlatform.Cds.Client -Force -AllowClobber
-        $env:Path += ";C:\Program Files\WindowsPowerShell\Modules\Microsoft.PowerApps.Administration.PowerShell"
-        $env:Path += ";C:\Program Files\WindowsPowerShell\Modules\Microsoft.PowerApps.PowerShell"
+        Import-Module Microsoft.PowerPlatform.Cds.Client
 
     # - name: who-am-i action
     #   uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
