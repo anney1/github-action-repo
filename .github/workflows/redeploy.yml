@@ -1,0 +1,37 @@
+name: Export and Redeploy Solution
+
+on:
+  workflow_dispatch:  # This is the manual trigger for export and redeploy
+
+jobs:
+  export-solution:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Export Solution
+      uses: microsoft/powerplatform-actions/export-solution@v1
+      with:
+        environment-url: ${{ secrets.ENVIRONMENT_URL }}
+        app-id: ${{ secrets.CLIENT_ID }}
+        client-secret: ${{ secrets.POWER_PLATFORM_SPN }}
+        tenant-id: ${{ secrets.TENANT_ID }}
+        solution-name: 'ALMLab'  # Your solution's name
+        solution-output-file: out/exported/ALMLab.zip
+
+  redeploy-solution:
+    needs: export-solution  # Ensures export completes before redeployment
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Import Solution to Prod
+      uses: microsoft/powerplatform-actions/import-solution@v1
+      with:
+        environment-url: ${{ secrets.PRODUCTION_ENVIRONMENT_URL }}
+        app-id: ${{ secrets.CLIENT_ID }}
+        client-secret: ${{ secrets.POWER_PLATFORM_SPN }}
+        tenant-id: ${{ secrets.TENANT_ID }}
+        solution-file: out/exported/YourSolutionName.zip
+        force-overwrite: true
+        publish-changes: true
