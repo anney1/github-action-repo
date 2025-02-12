@@ -1,0 +1,24 @@
+name: Export and Deploy Multiple Solutions
+
+on:
+  workflow_dispatch:
+
+jobs:
+  export-solutions:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        my_solution: ['Code', 'Prod', 'built']  # Change the matrix variable name here
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Export Solution
+      uses: microsoft/powerplatform-actions/export-solution@v1
+      with:
+        environment-url: ${{ secrets.ENVIRONMENT_URL }}
+        app-id: ${{ secrets.CLIENT_ID }}
+        client-secret: ${{ secrets.POWER_PLATFORM_SPN }}
+        tenant-id: ${{ secrets.TENANT_ID }}
+        solution-name: ${{ matrix.my_solution }}  # Use the updated variable name
+        solution-output-file: out/exported/${{ matrix.my_solution }}.zip  # Use the updated variable name
