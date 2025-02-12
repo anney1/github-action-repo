@@ -32,6 +32,6 @@ jobs:
         app-id: ${{ secrets.CLIENT_ID }}
         client-secret: ${{ secrets.POWER_PLATFORM_SPN }}
         tenant-id: ${{ secrets.TENANT_ID }}
-        solution-file: out/exported/YourSolutionName.zip
+        solution-file: out/exported/ALMLab.zip
         force-overwrite: true
         publish-changes: true
