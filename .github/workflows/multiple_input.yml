@@ -1,0 +1,40 @@
+name: Export and Deploy Multiple Solutions
+
+on:
+  workflow_dispatch:
+    inputs:
+      solution_name_1:
+        description: 'First Solution Name'
+        type: string
+        default: 'Solution1'
+      solution_name_2:
+        description: 'Second Solution Name'
+        type: string
+        default: 'Solution2'
+
+jobs:
+  export-solutions:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Export First Solution
+      uses: microsoft/powerplatform-actions/export-solution@v1
+      with:
+        environment-url: ${{ secrets.ENVIRONMENT_URL }}
+        app-id: ${{ secrets.CLIENT_ID }}
+        client-secret: ${{ secrets.POWER_PLATFORM_SPN }}
+        tenant-id: ${{ secrets.TENANT_ID }}
+        solution-name: ${{ inputs.solution_name_1 }}
+        solution-output-file: out/exported/${{ inputs.solution_name_1 }}.zip
+
+    - name: Export Second Solution
+      uses: microsoft/powerplatform-actions/export-solution@v1
+      with:
+        environment-url: ${{ secrets.ENVIRONMENT_URL }}
+        app-id: ${{ secrets.CLIENT_ID }}
+        client-secret: ${{ secrets.POWER_PLATFORM_SPN }}
+        tenant-id: ${{ secrets.TENANT_ID }}
+        solution-name: ${{ inputs.solution_name_2 }}
+        solution-output-file: out/exported/${{ inputs.solution_name_2 }}.zip
