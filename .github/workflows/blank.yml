@@ -43,56 +43,39 @@ jobs:
         Invoke-WebRequest -Uri https://aka.ms/powerplatform-vscode -OutFile powerplatform-vscode.msi
         Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
         $env:Path += ";C:\Program Files\WindowsPowerShell\Modules"
+        
+    - name: who-am-i action
+      uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
+      with:
+        environment-url: ${{env.ENVIRONMENT_URL}}
+        app-id: ${{env.CLIENT_ID}}
+        client-secret: ${{ secrets.PowerPlatformSPN }}
+        tenant-id: ${{env.TENANT_ID}}
 
-    - name: Configure Git user
-      run: |
-        git config --global user.email "faiza.riaz10@gmail.com"
-        git config --global user.name "Faiza Riaz"
+    - name: export-solution action
+      uses: microsoft/powerplatform-actions/export-solution@v1  # Use latest available version
+      with:
+        environment-url: ${{env.ENVIRONMENT_URL}}
+        app-id: ${{env.CLIENT_ID}}
+        client-secret: ${{ secrets.PowerPlatformSPN }}
+        tenant-id: ${{env.TENANT_ID}}
+        solution-name: ALMLab
+        solution-output-file: out/exported/ALMLab.zip
 
-    - name: Create a new file
-      run: |
-        echo "Make a simple change (e.g., creating a new file)" > workflowfile.txt
-        git add workflowfile.txt
-        git commit -m "Add new file"
+    - name: unpack-solution action
+      uses: microsoft/powerplatform-actions/unpack-solution@v1  # Use latest available version
+      with:
+        solution-file: out/exported/ALMLab.zip
+        solution-folder: out/solutions/ALMLab
+        solution-type: 'Unmanaged'
+        overwrite-files: true
 
-    - name: Push changes to new branch
-      env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Reference the stored secret
-      run: |
-        git remote set-url origin https://github-actions:${{ secrets.GH_TOKEN }}@github.com/anney1/github-action-repo.git
-        git push origin main  # Push the changes to the main branch
-    # - name: who-am-i action
-    #   uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
-    #   with:
-    #     environment-url: ${{env.ENVIRONMENT_URL}}
-    #     app-id: ${{env.CLIENT_ID}}
-    #     client-secret: ${{ secrets.PowerPlatformSPN }}
-    #     tenant-id: ${{env.TENANT_ID}}
-
-    # - name: export-solution action
-    #   uses: microsoft/powerplatform-actions/export-solution@v1  # Use latest available version
-    #   with:
-    #     environment-url: ${{env.ENVIRONMENT_URL}}
-    #     app-id: ${{env.CLIENT_ID}}
-    #     client-secret: ${{ secrets.PowerPlatformSPN }}
-    #     tenant-id: ${{env.TENANT_ID}}
-    #     solution-name: ${{ github.event.inputs.solution_name }}
-    #     solution-output-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
-
-    # - name: unpack-solution action
-    #   uses: microsoft/powerplatform-actions/unpack-solution@v1  # Use latest available version
-    #   with:
-    #     solution-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
-    #     solution-folder: ${{ github.event.inputs.solution_folder}}/${{ github.event.inputs.solution_name }}
-    #     solution-type: 'Unmanaged'
-    #     overwrite-files: true
-
-    # - name: branch-solution, prepare it for a PullRequest
-    #   uses: microsoft/powerplatform-actions/branch-solution@v1  # Use latest available version
-    #   with:
-    #     solution-folder: ${{ github.event.inputs.solution_folder}}/${{ github.event.inputs.solution_name }}
-    #     solution-target-folder: ${{ github.event.inputs.solution_target_folder}}/${{ github.event.inputs.solution_name }}
-    #     repo-token: ${{ secrets.GH_TOKEN }}
-    #     allow-empty-commit: true
+    - name: branch-solution, prepare it for a PullRequest
+      uses: microsoft/powerplatform-actions/branch-solution@v1  # Use latest available version
+      with:
+        solution-folder: out/solutions/ALMLab
+        solution-target-folder: solutions/ALMLab
+        repo-token: ${{ secrets.GH_TOKEN }}
+        allow-empty-commit: true
     
    
