@@ -11,7 +11,7 @@ on:
       solution_name:
         description: 'The solution name.'
         type: string
-        default: ALMLab       
+        default: gitsol       
       solution_shipping_folder:
         description: 'folder name for staging the exported solution *do not change*'        
         type: string
@@ -33,7 +33,7 @@ on:
         type: string
         required: true      
       PRODUCTION_ENVIRONMENT_URL: 
-        description: 'Production environment url.'
+        description: 'Prod Env URL'
         type: string
         required: true
       CLIENT_ID: 
@@ -64,31 +64,31 @@ jobs:
     - name: Pack solution
       uses: microsoft/powerplatform-actions/pack-solution@v0
       with:
-        solution-folder: solutions/ALMLab   # Hardcoded
-        solution-file: out/solutions/ALMLab.zip  # Hardcoded
+        solution-folder: solutions/gitsol   # Hardcoded
+        solution-file: out/solutions/gitsol.zip  # Hardcoded
         solution-type: Unmanaged
 
     - name: Import solution as unmanaged to build env
       uses: microsoft/powerplatform-actions/import-solution@v0
       with:
-        environment-url: ${{inputs.BUILD_ENVIRONMENT_URL}}
-        app-id: 'c37f4956-70a3-4e74-a2d2-225b579d1a21'
-        client-secret: ${{ secrets.envSecret }}
-        tenant-id: '302edaf0-65d6-449a-a796-b83cfb733f0d'
-        solution-file: out/solutions/ALMLab.zip  # Hardcoded
+        environment-url: ${{ secrets.DEV_ENV }}
+        app-id: ${{ secrets.CLIENT_ID }}
+        client-secret: ${{ secrets.Client_SPN }}
+        tenant-id: ${{ secrets.TENANT_ID }}
+        solution-file: out/solutions/gitsol.zip  # Hardcoded
         force-overwrite: true
         publish-changes: true
 
     - name: Export solution as managed
       uses: microsoft/powerplatform-actions/export-solution@v0
       with:
-        environment-url: ${{inputs.BUILD_ENVIRONMENT_URL}}
-        app-id: 'c37f4956-70a3-4e74-a2d2-225b579d1a21'
-        client-secret: ${{ secrets.envSecret }} 
-        tenant-id: '302edaf0-65d6-449a-a796-b83cfb733f0d'
-        solution-name: ALMLab
+        environment-url: ${{ secrets.DEV_ENV }}
+        app-id: ${{ secrets.CLIENT_ID }}
+        client-secret: ${{ secrets.Client_SPN }} 
+        tenant-id: ${{ secrets.TENANT_ID }}
+        solution-name: gitsol
         managed: true
-        solution-output-file: out/ship/ALMLab_managed.zip  # Hardcoded
+        solution-output-file: out/ship/gitsol_managed.zip  # Hardcoded
 
     - name: Upload the ready to ship solution to GH artifact store
       uses: actions/upload-artifact@v2
@@ -115,10 +115,10 @@ jobs:
     - name: Import solution to prod env
       uses: microsoft/powerplatform-actions/import-solution@v0
       with:
-        environment-url: 'https://your-prod-environment-url.com'  # Hardcoded production environment URL
-        app-id: 'c37f4956-70a3-4e74-a2d2-225b579d1a21'  # Hardcoded Client ID
-        client-secret: ${{ secrets.envSecret }}  # Secret value for client secret
-        tenant-id: '302edaf0-65d6-449a-a796-b83cfb733f0d'  # Hardcoded Tenant ID
-        solution-file: out/release/ALMLab_managed.zip  # Hardcoded path to managed solution
+        environment-url: ${{ secrets.PROD_ENV }}  # Hardcoded production environment URL
+        app-id: ${{ secrets.CLIENT_ID }}  # Hardcoded Client ID
+        client-secret: ${{ secrets.Client_SPN }}  # Secret value for client secret
+        tenant-id: ${{ secrets.TENANT_ID }}  # Hardcoded Tenant ID
+        solution-file: out/release/gitsol_managed.zip  # Hardcoded path to managed solution
         force-overwrite: true
         publish-changes: true
