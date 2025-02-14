@@ -63,22 +63,22 @@ jobs:
         app-id: ${{ secrets.CLIENT_ID }}
         client-secret: ${{ secrets.Client_SPN }}
         tenant-id: ${{secrets.TENANT_ID}}
-        solution-name: devsol
-        solution-output-file: out/exported/devsol.zip
+        solution-name: gitsol
+        solution-output-file: out/exported/gitsol.zip
 
     - name: unpack-solution action
       uses: microsoft/powerplatform-actions/unpack-solution@v1  # Use latest available version
       with:
-        solution-file: out/exported/devsol.zip
-        solution-folder: out/solutions/devsol
+        solution-file: out/exported/gitsol.zip
+        solution-folder: out/solutions/gitsol
         solution-type: 'Unmanaged'
         overwrite-files: true
 
     - name: branch-solution, prepare it for a PullRequest
       uses: microsoft/powerplatform-actions/branch-solution@v1  # Use latest available version
       with:
-        solution-folder: out/solutions/devsol
-        solution-target-folder: solutions/devsol
+        solution-folder: out/solutions/gitsol
+        solution-target-folder: solutions/gitsol
         repo-token: ${{ secrets.GH_TOKEN }}
         allow-empty-commit: true
     
