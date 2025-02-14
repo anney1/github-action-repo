@@ -43,14 +43,18 @@ jobs:
         Invoke-WebRequest -Uri https://aka.ms/powerplatform-vscode -OutFile powerplatform-vscode.msi
         Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
         $env:Path += ";C:\Program Files\WindowsPowerShell\Modules"
-        
+
+    - name: Install PAC CLI
+      uses: microsoft/powerplatform-actions/actions-install@v1  # Install PAC CLI
+      id: install-pac
+      
     - name: who-am-i action
       uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
       with:
-        environment-url: ${{env.ENVIRONMENT_URL}}
-        app-id: ${{env.CLIENT_ID}}
+        environment-url: 'https://org5569b62d.crm15.dynamics.com'
+        app-id: '94e95571-a37c-432e-bae6-1ae9671a4983'
         client-secret: ${{ secrets.Client_SPN }}
-        tenant-id: ${{env.TENANT_ID}}
+        tenant-id: ${{secrets.TENANT_ID}}
 
     - name: export-solution action
       uses: microsoft/powerplatform-actions/export-solution@v1  # Use latest available version
