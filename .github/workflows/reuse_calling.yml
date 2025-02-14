@@ -33,7 +33,7 @@ on:
         type: string
         required: true      
       PRODUCTION_ENVIRONMENT_URL: 
-        description: 'Prod Env URL'
+        description: 'Production environment url.'
         type: string
         required: true
       CLIENT_ID: 
@@ -64,37 +64,37 @@ jobs:
     - name: Pack solution
       uses: microsoft/powerplatform-actions/pack-solution@v0
       with:
-        solution-folder: solutions/gitsol   # Hardcoded
-        solution-file: out/solutions/gitsol.zip  # Hardcoded
+        solution-folder: ${{ inputs.solution_source_folder}}/${{ inputs.solution_name }}
+        solution-file: ${{ inputs.solution_outbound_folder}}/${{ inputs.solution_name }}.zip
         solution-type: Unmanaged
 
     - name: Import solution as unmanaged to build env
       uses: microsoft/powerplatform-actions/import-solution@v0
       with:
-        environment-url: ${{ secrets.DEV_ENV }}
-        app-id: ${{ secrets.CLIENT_ID }}
-        client-secret: ${{ secrets.Client_SPN }}
-        tenant-id: ${{ secrets.TENANT_ID }}
-        solution-file: out/solutions/gitsol.zip  # Hardcoded
+        environment-url: ${{inputs.BUILD_ENVIRONMENT_URL}}
+        app-id: ${{inputs.CLIENT_ID}}
+        client-secret: ${{ secrets.envSecret }}
+        tenant-id: ${{inputs.TENANT_ID}}
+        solution-file: ${{ inputs.solution_outbound_folder}}/${{ inputs.solution_name }}.zip
         force-overwrite: true
         publish-changes: true
 
     - name: Export solution as managed
       uses: microsoft/powerplatform-actions/export-solution@v0
       with:
-        environment-url: ${{ secrets.DEV_ENV }}
-        app-id: ${{ secrets.CLIENT_ID }}
-        client-secret: ${{ secrets.Client_SPN }} 
-        tenant-id: ${{ secrets.TENANT_ID }}
-        solution-name: gitsol
+        environment-url: ${{inputs.BUILD_ENVIRONMENT_URL}}
+        app-id: ${{inputs.CLIENT_ID}}
+        client-secret: ${{ secrets.envSecret }} 
+        tenant-id: ${{inputs.TENANT_ID}}
+        solution-name: ${{ inputs.solution_name }}
         managed: true
-        solution-output-file: out/ship/gitsol_managed.zip  # Hardcoded
+        solution-output-file: ${{ inputs.solution_shipping_folder}}/${{ inputs.solution_name }}_managed.zip
 
     - name: Upload the ready to ship solution to GH artifact store
       uses: actions/upload-artifact@v2
       with:
         name: managedSolutions
-        path: out/ship/  # Hardcoded
+        path: ${{ inputs.solution_shipping_folder}}/
 
   release-to-staging:
     needs: [ convert-to-managed ]
@@ -111,14 +111,14 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: managedSolutions
-        path: out/release  # Hardcoded
+        path: ${{ inputs.solution_release_folder}}
     - name: Import solution to prod env
       uses: microsoft/powerplatform-actions/import-solution@v0
       with:
-        environment-url: ${{ secrets.PROD_ENV }}  # Hardcoded production environment URL
-        app-id: ${{ secrets.CLIENT_ID }}  # Hardcoded Client ID
-        client-secret: ${{ secrets.Client_SPN }}  # Secret value for client secret
-        tenant-id: ${{ secrets.TENANT_ID }}  # Hardcoded Tenant ID
-        solution-file: out/release/gitsol_managed.zip  # Hardcoded path to managed solution
+        environment-url: ${{inputs.PRODUCTION_ENVIRONMENT_URL}}
+        app-id: ${{inputs.CLIENT_ID}}
+        client-secret: ${{ secrets.envSecret }}
+        tenant-id: ${{inputs.TENANT_ID}}
+        solution-file: ${{ inputs.solution_release_folder}}/${{ inputs.solution_name }}_managed.zip
         force-overwrite: true
         publish-changes: true
