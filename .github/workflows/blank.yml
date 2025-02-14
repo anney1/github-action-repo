@@ -6,7 +6,7 @@ on:
       solution_name:
         description: 'Name of the solution to work on from Power Platform'
         required: true
-        default: devsol
+        default: gitsol
       solution_exported_folder:
         description: 'Folder name for staging the exported solution *do not change*'
         required: true
@@ -21,9 +21,9 @@ on:
         default: solutions/
 
 env:
-  ENVIRONMENT_URL: 'https://org5569b62d.crm15.dynamics.com'
-  CLIENT_ID: '94e95571-a37c-432e-bae6-1ae9671a4983'
-  TENANT_ID: '302edaf0-65d6-449a-a796-b83cfb733f0d'
+  ENVIRONMENT_URL: secrets.DEV_ENV
+  CLIENT_ID: secrets.CLIENT_ID
+  TENANT_ID: secrets.TENANT_ID
 
 permissions:
   contents: write
@@ -51,16 +51,16 @@ jobs:
     - name: who-am-i action
       uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
       with:
-        environment-url: 'https://org5569b62d.crm15.dynamics.com'
-        app-id: '94e95571-a37c-432e-bae6-1ae9671a4983'
+        environment-url: ${{ secrets.DEV_ENV }}
+        app-id: ${{ secrets.CLIENT_ID }}
         client-secret: ${{ secrets.Client_SPN }}
         tenant-id: ${{secrets.TENANT_ID}}
 
     - name: export-solution action
       uses: microsoft/powerplatform-actions/export-solution@v1  # Use latest available version
       with:
-        environment-url: 'https://org5569b62d.crm15.dynamics.com'
-        app-id: '94e95571-a37c-432e-bae6-1ae9671a4983'
+        environment-url: ${{ secrets.DEV_ENV }}
+        app-id: ${{ secrets.CLIENT_ID }}
         client-secret: ${{ secrets.Client_SPN }}
         tenant-id: ${{secrets.TENANT_ID}}
         solution-name: devsol
