@@ -6,7 +6,7 @@ on:
       solution_name:
         description: 'Name of the solution to work on from Power Platform'
         required: true
-        default: almlab
+        default: devsol
       solution_exported_folder:
         description: 'Folder name for staging the exported solution *do not change*'
         required: true
@@ -47,7 +47,7 @@ jobs:
     - name: Install PAC CLI
       uses: microsoft/powerplatform-actions/actions-install@v1  # Install PAC CLI
       id: install-pac
-      
+
     - name: who-am-i action
       uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
       with:
@@ -63,22 +63,22 @@ jobs:
         app-id: '94e95571-a37c-432e-bae6-1ae9671a4983'
         client-secret: ${{ secrets.Client_SPN }}
         tenant-id: ${{secrets.TENANT_ID}}
-        solution-name: almlab
-        solution-output-file: out/exported/almlab.zip
+        solution-name: devsol
+        solution-output-file: out/exported/devsol.zip
 
     - name: unpack-solution action
       uses: microsoft/powerplatform-actions/unpack-solution@v1  # Use latest available version
       with:
-        solution-file: out/exported/almlab.zip
-        solution-folder: out/solutions/almlab
+        solution-file: out/exported/devsol.zip
+        solution-folder: out/solutions/devsol
         solution-type: 'Unmanaged'
         overwrite-files: true
 
     - name: branch-solution, prepare it for a PullRequest
       uses: microsoft/powerplatform-actions/branch-solution@v1  # Use latest available version
       with:
-        solution-folder: out/solutions/almlab
-        solution-target-folder: solutions/almlab
+        solution-folder: out/solutions/devsol
+        solution-target-folder: solutions/devsol
         repo-token: ${{ secrets.GH_TOKEN }}
         allow-empty-commit: true
     
