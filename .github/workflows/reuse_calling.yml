@@ -1,4 +1,5 @@
 name: release-solution-to-prod-reusable
+
 on:
   workflow_call:
     inputs:
@@ -60,70 +61,67 @@ jobs:
       run: |
         Invoke-WebRequest -Uri https://aka.ms/powerplatform-vscode -OutFile powerplatform-vscode.msi
         Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
-        $env:Path += ";C:\Program Files\WindowsPowerShell\Modules"
+      shell: powershell
 
-    - name: Install PAC CLI
-      uses: microsoft/powerplatform-actions/actions-install@v1  # Install PAC CLI
-      id: install-pac
+    - name: Add Power Platform CLI to PATH
+      shell: powershell
+      run: |
+        $env:Path += ";C:\Program Files\PowerShell\7\Modules\Microsoft.PowerPlatform.Cds.Client\"
 
-    # Authenticate with Power Platform
     - name: Authenticate with Power Platform
+      shell: pwsh
       run: |
         pac auth create --url ${{ inputs.BUILD_ENVIRONMENT_URL }} --applicationId ${{ inputs.CLIENT_ID }} --clientSecret ${{ secrets.envSecret }} --tenant ${{ inputs.TENANT_ID }}
 
-    # Debug repository contents to check the folder structure
-    - name: Debug repository contents
-      run: |
-        ls -R
+    - name: Debug repository contents to check the folder structure
+      run: ls -R
 
-    # Debug solution folder structure
     - name: Debug solution folder structure
-      run: |
-        ls -R ${{ inputs.solution_source_folder }}/${{ inputs.solution_name }}
+      run: ls -R ${{ inputs.solution_source_folder }}/${{ inputs.solution_name }}
 
     - name: Pack solution
       uses: microsoft/powerplatform-actions/pack-solution@main
       with:
-        solution-folder: ${{ inputs.solution_source_folder }}/${{ inputs.solution_name }}  # Use input for solution folder
-        solution-file: ${{ inputs.solution_outbound_folder }}/${{ inputs.solution_name }}.zip  # Use input for solution file
+        solution-folder: ${{ inputs.solution_source_folder }}/${{ inputs.solution_name }}
+        solution-file: ${{ inputs.solution_outbound_folder }}/${{ inputs.solution_name }}.zip
         solution-type: Unmanaged
 
     - name: Import solution as unmanaged to build env
       uses: microsoft/powerplatform-actions/import-solution@main
       with:
-        environment-url: ${{ inputs.BUILD_ENVIRONMENT_URL }}  # Use input for build environment URL
-        app-id: ${{ inputs.CLIENT_ID }}  # Use input for client ID
-        client-secret: ${{ secrets.envSecret }}  # Use secret for client secret
-        tenant-id: ${{ inputs.TENANT_ID }}  # Use input for tenant ID
-        solution-file: ${{ inputs.solution_outbound_folder }}/${{ inputs.solution_name }}.zip  # Use input for solution file
+        environment-url: ${{ inputs.BUILD_ENVIRONMENT_URL }}
+        app-id: ${{ inputs.CLIENT_ID }}
+        client-secret: ${{ secrets.envSecret }}
+        tenant-id: ${{ inputs.TENANT_ID }}
+        solution-file: ${{ inputs.solution_outbound_folder }}/${{ inputs.solution_name }}.zip
         force-overwrite: true
         publish-changes: true
 
     - name: Export solution as managed
       uses: microsoft/powerplatform-actions/export-solution@main
       with:
-        environment-url: ${{ inputs.BUILD_ENVIRONMENT_URL }}  # Use input for build environment URL
-        app-id: ${{ inputs.CLIENT_ID }}  # Use input for client ID
-        client-secret: ${{ secrets.envSecret }}  # Use secret for client secret
-        tenant-id: ${{ inputs.TENANT_ID }}  # Use input for tenant ID
-        solution-name: ${{ inputs.solution_name }}  # Use input for solution name
+        environment-url: ${{ inputs.BUILD_ENVIRONMENT_URL }}
+        app-id: ${{ inputs.CLIENT_ID }}
+        client-secret: ${{ secrets.envSecret }}
+        tenant-id: ${{ inputs.TENANT_ID }}
+        solution-name: ${{ inputs.solution_name }}
         managed: true
-        solution-output-file: ${{ inputs.solution_shipping_folder }}/${{ inputs.solution_name }}_managed.zip  # Use input for solution output file
+        solution-output-file: ${{ inputs.solution_shipping_folder }}/${{ inputs.solution_name }}_managed.zip
 
     - name: Upload the ready to ship solution to GH artifact store
       uses: actions/upload-artifact@v4
       with:
         name: managedSolutions
-        path: ${{ inputs.solution_shipping_folder }}  # Use input for shipping folder
+        path: ${{ inputs.solution_shipping_folder }}
 
   release-to-staging:
-    needs: [ convert-to-managed ]
+    needs: [convert-to-managed]
     runs-on: windows-latest
     env:
       RUNNER_DEBUG: 1
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         lfs: true
 
@@ -131,15 +129,15 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: managedSolutions
-        path: ${{ inputs.solution_release_folder }}  # Use input for release folder
+        path: ${{ inputs.solution_release_folder }}
 
     - name: Import solution to prod env
       uses: microsoft/powerplatform-actions/import-solution@v0
       with:
-        environment-url: ${{ inputs.PRODUCTION_ENVIRONMENT_URL }}  # Use input for production environment URL
-        app-id: ${{ inputs.CLIENT_ID }}  # Use input for client ID
-        client-secret: ${{ secrets.envSecret }}  # Use secret for client secret
-        tenant-id: ${{ inputs.TENANT_ID }}  # Use input for tenant ID
-        solution-file: ${{ inputs.solution_release_folder }}/${{ inputs.solution_name }}_managed.zip  # Use input for solution file
+        environment-url: ${{ inputs.PRODUCTION_ENVIRONMENT_URL }}
+        app-id: ${{ inputs.CLIENT_ID }}
+        client-secret: ${{ secrets.envSecret }}
+        tenant-id: ${{ inputs.TENANT_ID }}
+        solution-file: ${{ inputs.solution_release_folder }}/${{ inputs.solution_name }}_managed.zip
         force-overwrite: true
         publish-changes: true
