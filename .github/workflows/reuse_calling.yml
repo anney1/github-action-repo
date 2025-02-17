@@ -60,14 +60,14 @@ jobs:
         pac auth create --url ${{ secrets.DEV_ENV }} --applicationId ${{ secrets.CLIENT_ID }} --clientSecret ${{ secrets.envSecret }} --tenant ${{ secrets.TENANT_ID }}
 
     - name: Pack solution
-      uses: microsoft/powerplatform-actions/pack-solution@v0.0.2
+      uses: microsoft/powerplatform-actions/pack-solution@main
       with:
         solution-folder: ${{ inputs.solution_source_folder }}/${{ inputs.solution_name }}  # Use input for solution folder
         solution-file: ${{ inputs.solution_outbound_folder }}/${{ inputs.solution_name }}.zip  # Use input for solution file
         solution-type: Unmanaged
 
     - name: Import solution as unmanaged to build env
-      uses: microsoft/powerplatform-actions/import-solution@v0.0.2
+      uses: microsoft/powerplatform-actions/import-solution@main
       with:
         environment-url: ${{ inputs.BUILD_ENVIRONMENT_URL }}  # Use input for build environment URL
         app-id: ${{ inputs.CLIENT_ID }}  # Use input for client ID
@@ -78,7 +78,7 @@ jobs:
         publish-changes: true
 
     - name: Export solution as managed
-      uses: microsoft/powerplatform-actions/export-solution@v0.0.2
+      uses: microsoft/powerplatform-actions/export-solution@main
       with:
         environment-url: ${{ inputs.BUILD_ENVIRONMENT_URL }}  # Use input for build environment URL
         app-id: ${{ inputs.CLIENT_ID }}  # Use input for client ID
