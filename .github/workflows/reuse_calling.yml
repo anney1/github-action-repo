@@ -52,7 +52,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        lfs: true
+        ref: gitsol-20250214-1206
+      # with:
+      #   lfs: true
 
     - name: Pack solution
       uses: microsoft/powerplatform-actions/pack-solution@v0
