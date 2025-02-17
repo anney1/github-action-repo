@@ -55,6 +55,9 @@ jobs:
         ref: gitsol-20250214-1206
       # with:
       #   lfs: true
+    - name: Authenticate to Power Platform environment
+      run: |
+        pac auth create --url ${{ secrets.DEV_ENV }} --applicationId ${{ secrets.CLIENT_ID }} --clientSecret ${{ secrets.envSecret }} --tenant ${{ secrets.TENANT_ID }}
 
     - name: Pack solution
       uses: microsoft/powerplatform-actions/pack-solution@v0
