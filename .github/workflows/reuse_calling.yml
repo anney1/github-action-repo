@@ -64,6 +64,11 @@ jobs:
         Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
       shell: powershell
 
+    - name: Add Power Platform CLI to PATH
+      run: |
+        echo "##[add-path]C:\\Program Files\\Power Platform\\Tools"
+      shell: powershell
+
     # - name: Add Power Platform CLI to PATH
     #   shell: powershell
     #   run: |
