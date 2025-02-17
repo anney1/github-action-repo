@@ -57,16 +57,26 @@ jobs:
       # with:
       #   lfs: true
 
-    - name: Install Power Platform CLI
-      run: |
-        Invoke-WebRequest -Uri https://aka.ms/powerplatform-vscode -OutFile powerplatform-vscode.msi
-        Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
-      shell: powershell
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
 
-    - name: Add Power Platform CLI to PATH
-      shell: powershell
+    - name: Install PAC CLI
       run: |
-        $env:Path += ";C:\Program Files\PowerShell\7\Modules\Microsoft.PowerPlatform.Cds.Client\"
+        npm install -g @microsoft/powerplatform-cli
+      shell: cmd
+
+    # - name: Install Power Platform CLI
+    #   run: |
+    #     Invoke-WebRequest -Uri https://aka.ms/powerplatform-vscode -OutFile powerplatform-vscode.msi
+    #     Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
+    #   shell: powershell
+
+    # - name: Add Power Platform CLI to PATH
+    #   shell: powershell
+    #   run: |
+    #     $env:Path += ";C:\Program Files\PowerShell\7\Modules\Microsoft.PowerPlatform.Cds.Client\"
 
     # - name: Authenticate with Power Platform
     #   shell: pwsh
