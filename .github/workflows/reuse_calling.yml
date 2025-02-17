@@ -58,7 +58,7 @@ jobs:
       #   lfs: true
 
     - name: Setup Power Platform CLI
-      uses: ./.github/actions/setup-pac
+      uses: ./.github/actions/set-pac-path
       
     # - name: Install Power Platform CLI
     #   uses: microsoft/powerplatform-actions/setup@v1
