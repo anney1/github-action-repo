@@ -57,21 +57,32 @@ jobs:
       #   lfs: true
 
     - name: Install PAC CLI
-      uses: microsoft/powerplatform-actions/actions-install@v1  # Install PAC CLI
+      uses: microsoft/powerplatform-actions/actions-install@v1
       id: install-pac
 
+    # Verify PAC CLI is installed correctly
+    - name: Check PAC CLI version
+      run: pac --version
+
+    # Authenticate with Power Platform
+    - name: Authenticate with Power Platform
+      run: |
+        pac auth create --url ${{ inputs.BUILD_ENVIRONMENT_URL }} --applicationId ${{ inputs.CLIENT_ID }} --clientSecret ${{ secrets.envSecret }} --tenant ${{ inputs.TENANT_ID }}
+
+    # Debug repository contents to check the folder structure
     - name: Debug repository contents
       run: |
         ls -R
 
+    # Debug solution folder structure
     - name: Debug solution folder structure
       run: |
         ls -R ${{ inputs.solution_source_folder }}/${{ inputs.solution_name }}
-      
-    - name: Authenticate to Power Platform environment
-      run: |
-        pac auth create --url ${{ secrets.DEV_ENV }} --applicationId ${{ secrets.CLIENT_ID }} --clientSecret ${{ secrets.envSecret }} --tenant ${{ secrets.TENANT_ID }}
 
+    # Pack solution (as the next step)
+    - name: Pack solution
+      run: pac solution pack --folder ${{ inputs.solution_source_folder }} --zipfile ${{ inputs.solution_outbound_folder }}/${{ inputs.solution_name }}.zip --packagetype Unmanaged
+  
     - name: Pack solution
       uses: microsoft/powerplatform-actions/pack-solution@main
       with:
