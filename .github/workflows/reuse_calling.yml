@@ -92,10 +92,10 @@ jobs:
     #   run: |
     #     $env:Path += ";C:\Program Files\PowerShell\7\Modules\Microsoft.PowerPlatform.Cds.Client\"
 
-    - name: Authenticate with Power Platform
-      shell: pwsh
-      run: |
-        pac auth create --url ${{ inputs.BUILD_ENVIRONMENT_URL }} --applicationId ${{ inputs.CLIENT_ID }} --clientSecret ${{ secrets.envSecret }} --tenant ${{ inputs.TENANT_ID }}
+    # - name: Authenticate with Power Platform
+    #   shell: pwsh
+    #   run: |
+    #     pac auth create --url ${{ inputs.BUILD_ENVIRONMENT_URL }} --applicationId ${{ inputs.CLIENT_ID }} --clientSecret ${{ secrets.envSecret }} --tenant ${{ inputs.TENANT_ID }}
 
     - name: Debug repository contents to check the folder structure
       run: ls -R
