@@ -56,13 +56,15 @@ jobs:
       # with:
       #   lfs: true
 
-    - name: Install PAC CLI
-      uses: microsoft/powerplatform-actions/actions-install@v1
-      id: install-pac
+    - name: Install Power Platform CLI
+      run: |
+        Invoke-WebRequest -Uri https://aka.ms/powerplatform-vscode -OutFile powerplatform-vscode.msi
+        Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
+        $env:Path += ";C:\Program Files\WindowsPowerShell\Modules"
 
-    # Verify PAC CLI is installed correctly
-    - name: Check PAC CLI version
-      run: pac --version
+    - name: Install PAC CLI
+      uses: microsoft/powerplatform-actions/actions-install@v1  # Install PAC CLI
+      id: install-pac
 
     # Authenticate with Power Platform
     - name: Authenticate with Power Platform
@@ -79,10 +81,6 @@ jobs:
       run: |
         ls -R ${{ inputs.solution_source_folder }}/${{ inputs.solution_name }}
 
-    # Pack solution (as the next step)
-    - name: Pack solution
-      run: pac solution pack --folder ${{ inputs.solution_source_folder }} --zipfile ${{ inputs.solution_outbound_folder }}/${{ inputs.solution_name }}.zip --packagetype Unmanaged
-  
     - name: Pack solution
       uses: microsoft/powerplatform-actions/pack-solution@main
       with:
