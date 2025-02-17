@@ -77,9 +77,10 @@ jobs:
         # tenant-id: '302edaf0-65d6-449a-a796-b83cfb733f0d'
         
         environment-url: ${{ inputs.BUILD_ENVIRONMENT_URL }}
-        app-id: '94e95571-a37c-432e-bae6-1ae9671a4983'
-        # app-id: ${{ inputs.CLIENT_ID }}
-        client-secret: ${{ secrets.envSecret }}
+        # app-id: '94e95571-a37c-432e-bae6-1ae9671a4983'
+        app-id: ${{ inputs.CLIENT_ID }}
+        client-secret: 'Icm8Q~DW6gqGm1Cn8CO02HaiHTgnYfh_lCla5bU1'
+        # client-secret: ${{ secrets.envSecret }}
         tenant-id: ${{ inputs.TENANT_ID }}
   
         solution-file: ${{ inputs.solution_outbound_folder }}/${{ inputs.solution_name }}.zip
