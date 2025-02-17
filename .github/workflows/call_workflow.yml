@@ -15,9 +15,9 @@ jobs:
       #You can specify the solution name here
       solution_name: gitsol
       #Update your values here
-      BUILD_ENVIRONMENT_URL: secrets.DEV_ENV
+      BUILD_ENVIRONMENT_URL: secrets.BUILD_ENV
       PRODUCTION_ENVIRONMENT_URL: secrets.PROD_ENV
       CLIENT_ID: secrets.CLIENT_ID
       TENANT_ID: secrets.TENANT_ID      
     secrets:
-      envSecret: ${{ secrets.Client_SPN }}
+      envSecret: ${{ secrets.ENVSECRET }}
