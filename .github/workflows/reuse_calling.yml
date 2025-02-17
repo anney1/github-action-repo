@@ -54,34 +54,34 @@ jobs:
     - name: Checkout main branch for custom actions
       uses: actions/checkout@v3
       with:
-        ref: main
+        lfs: true
 
-    - name: Install Git LFS
-      run: |
-        git lfs install
+    # - name: Install Git LFS
+    #   run: |
+    #     git lfs install
 
     - name: Install Power Platform CLI (PAC)
       uses: microsoft/powerplatform-actions/actions-install@v1
-      id: install-pac
-    - name: Find PAC CLI Path
-      run: |
-        $pacPath = Get-Command pac | Select-Object -ExpandProperty Source
-        echo "PAC found at: $pacPath"
-        echo "Adding PAC CLI path to environment..."
-        echo "$(Split-Path $pacPath)" | Out-File -FilePath $env:GITHUB_PATH -Append
+      # id: install-pac
+    # - name: Find PAC CLI Path
+    #   run: |
+    #     $pacPath = Get-Command pac | Select-Object -ExpandProperty Source
+    #     echo "PAC found at: $pacPath"
+    #     echo "Adding PAC CLI path to environment..."
+    #     echo "$(Split-Path $pacPath)" | Out-File -FilePath $env:GITHUB_PATH -Append
 
-    - name: Verify PAC CLI Installation
-      run: |
-        $env:Path += ";C:\Program Files (x86)\Microsoft Power Platform CLI"
-        pac --version
+    # - name: Verify PAC CLI Installation
+    #   run: |
+    #     $env:Path += ";C:\Program Files (x86)\Microsoft Power Platform CLI"
+    #     pac --version
 
-    - name: Authenticate with PAC CLI (Build Environment)
-      run: |
-        pac auth create --name "BuildEnv" `
-          --url "${{ inputs.BUILD_ENVIRONMENT_URL }}" `
-          --applicationId "${{ inputs.CLIENT_ID }}" `
-          --clientSecret "${{ secrets.envSecret }}" `
-          --tenant "${{ inputs.TENANT_ID }}"
+    # - name: Authenticate with PAC CLI (Build Environment)
+    #   run: |
+    #     pac auth create --name "BuildEnv" `
+    #       --url "${{ inputs.BUILD_ENVIRONMENT_URL }}" `
+    #       --applicationId "${{ inputs.CLIENT_ID }}" `
+    #       --clientSecret "${{ secrets.envSecret }}" `
+    #       --tenant "${{ inputs.TENANT_ID }}"
 
     # - name: Install Power Platform CLI
     #   run: |
@@ -89,14 +89,10 @@ jobs:
     #     Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
     #     $env:Path += ";C:\Program Files\WindowsPowerShell\Modules"
 
-    # - name: Install PAC CLI
-    #   uses: microsoft/powerplatform-actions/actions-install@v1  # Install PAC CLI
-    #   id: install-pac
-
-    - name: Checkout gitsol branch for workflow files
-      uses: actions/checkout@v3
-      with:
-        ref: gitsol-20250214-1206
+    # - name: Checkout gitsol branch for workflow files
+    #   uses: actions/checkout@v3
+    #   with:
+    #     ref: gitsol-20250214-1206
 
       # with:
       #   lfs: true
@@ -121,11 +117,11 @@ jobs:
     #   run: |
     #     pac auth create --url ${{ inputs.BUILD_ENVIRONMENT_URL }} --applicationId ${{ inputs.CLIENT_ID }} --clientSecret ${{ secrets.envSecret }} --tenant ${{ inputs.TENANT_ID }}
 
-    - name: Debug repository contents to check the folder structure
-      run: ls -R
+    # - name: Debug repository contents to check the folder structure
+    #   run: ls -R
 
-    - name: Debug solution folder structure
-      run: ls -R ${{ inputs.solution_source_folder }}/${{ inputs.solution_name }}
+    # - name: Debug solution folder structure
+    #   run: ls -R ${{ inputs.solution_source_folder }}/${{ inputs.solution_name }}
 
     - name: Pack solution
       uses: microsoft/powerplatform-actions/pack-solution@main
