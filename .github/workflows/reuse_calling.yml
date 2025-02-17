@@ -56,24 +56,43 @@ jobs:
       with:
         ref: main
 
-
-    - name: Install Power Platform CLI
+    - name: Install Git LFS
       run: |
-        Invoke-WebRequest -Uri https://aka.ms/powerplatform-vscode -OutFile powerplatform-vscode.msi
-        Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
-        $env:Path += ";C:\Program Files\WindowsPowerShell\Modules"
+        git lfs install
 
-    - name: Install PAC CLI
-      uses: microsoft/powerplatform-actions/actions-install@v1  # Install PAC CLI
+    - name: Install Power Platform CLI (PAC)
+      uses: microsoft/powerplatform-actions/actions-install@v1
       id: install-pac
+
+    - name: Add PAC CLI to PATH
+      run: |
+        echo "C:\Program Files\Power Platform CLI" | Out-File -FilePath $env:GITHUB_PATH -Append
+        $env:Path += ";C:\Program Files\Power Platform CLI"
+        pac --version  # Verify installation
+
+    - name: Authenticate with PAC CLI (Build Environment)
+      run: |
+        pac auth create --name "BuildEnv" `
+          --url "${{ inputs.BUILD_ENVIRONMENT_URL }}" `
+          --applicationId "${{ inputs.CLIENT_ID }}" `
+          --clientSecret "${{ secrets.envSecret }}" `
+          --tenant "${{ inputs.TENANT_ID }}"
+
+    # - name: Install Power Platform CLI
+    #   run: |
+    #     Invoke-WebRequest -Uri https://aka.ms/powerplatform-vscode -OutFile powerplatform-vscode.msi
+    #     Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
+    #     $env:Path += ";C:\Program Files\WindowsPowerShell\Modules"
+
+    # - name: Install PAC CLI
+    #   uses: microsoft/powerplatform-actions/actions-install@v1  # Install PAC CLI
+    #   id: install-pac
 
     - name: Checkout gitsol branch for workflow files
       uses: actions/checkout@v3
       with:
         ref: gitsol-20250214-1206
-    # - uses: actions/checkout@v3
-    #   with:
-    #     ref: gitsol-20250214-1206
+
       # with:
       #   lfs: true
 
@@ -154,6 +173,21 @@ jobs:
       with:
         name: managedSolutions
         path: ${{ inputs.solution_release_folder }}
+
+    - name: Add PAC CLI to PATH (For Production)
+      run: |
+        echo "C:\Program Files\Power Platform CLI" | Out-File -FilePath $env:GITHUB_PATH -Append
+        $env:Path += ";C:\Program Files\Power Platform CLI"
+        pac --version  # Verify installation
+
+    - name: Authenticate with PAC CLI (Production Environment)
+      run: |
+        pac auth create --name "ProdEnv" `
+          --url "${{ inputs.PRODUCTION_ENVIRONMENT_URL }}" `
+          --applicationId "${{ inputs.CLIENT_ID }}" `
+          --clientSecret "${{ secrets.envSecret }}" `
+          --tenant "${{ inputs.TENANT_ID }}"
+
 
     - name: Import solution to prod env
       uses: microsoft/powerplatform-actions/import-solution@v0
