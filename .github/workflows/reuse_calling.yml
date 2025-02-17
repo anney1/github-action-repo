@@ -57,7 +57,7 @@ jobs:
         ref: main
 
     - name: Setup Power Platform CLI
-      uses: ./.github/actions/setup-pac
+      uses: ./.github/actions/set-pac-path
 
     - name: Checkout gitsol branch for workflow files
       uses: actions/checkout@v3
