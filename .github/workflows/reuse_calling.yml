@@ -60,13 +60,13 @@ jobs:
 
     - name: Install Power Platform CLI
       run: |
-        Invoke-WebRequest -Uri https://aka.ms/powerplatform-vscode -OutFile powerplatform-vscode.msi
-        Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
+        Install-Module -Name Microsoft.PowerPlatform.Cds.Client -Force -AllowClobber
+        Import-Module Microsoft.PowerPlatform.Cds.Client
+        $Env:Path += ";C:\Program Files\WindowsPowerShell\Modules\Microsoft.PowerPlatform.Cds.Client"
       shell: powershell
 
-    - name: Add Power Platform CLI to PATH
-      run: |
-        echo "C:\\Program Files\\Power Platform\\Tools" | Out-File -FilePath $Env:GITHUB_PATH -Encoding utf8
+    - name: Verify Power Platform CLI installation
+      run: pac --version
       shell: powershell
 
     # - name: Add Power Platform CLI to PATH
