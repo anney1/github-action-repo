@@ -57,31 +57,24 @@ jobs:
       # with:
       #   lfs: true
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
 
-    - name: Install PAC CLI
+    - name: Install Power Platform CLI
       run: |
-        npm install -g @microsoft/powerplatform-cli
-      shell: cmd
-
-    # - name: Install Power Platform CLI
-    #   run: |
-    #     Invoke-WebRequest -Uri https://aka.ms/powerplatform-vscode -OutFile powerplatform-vscode.msi
-    #     Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
-    #   shell: powershell
+        Invoke-WebRequest -Uri https://aka.ms/powerplatform-vscode -OutFile powerplatform-vscode.msi
+        Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
+      shell: powershell
 
     # - name: Add Power Platform CLI to PATH
     #   shell: powershell
     #   run: |
     #     $env:Path += ";C:\Program Files\PowerShell\7\Modules\Microsoft.PowerPlatform.Cds.Client\"
-
-    # - name: Authenticate with Power Platform
-    #   shell: pwsh
-    #   run: |
-    #     pac auth create --url ${{ inputs.BUILD_ENVIRONMENT_URL }} --applicationId ${{ inputs.CLIENT_ID }} --clientSecret ${{ secrets.envSecret }} --tenant ${{ inputs.TENANT_ID }}
+    - name: Verify Power Platform CLI installation
+      shell: powershell
+      run: pac --version
+    - name: Authenticate with Power Platform
+      shell: pwsh
+      run: |
+        pac auth create --url ${{ inputs.BUILD_ENVIRONMENT_URL }} --applicationId ${{ inputs.CLIENT_ID }} --clientSecret ${{ secrets.envSecret }} --tenant ${{ inputs.TENANT_ID }}
 
     - name: Debug repository contents to check the folder structure
       run: ls -R
