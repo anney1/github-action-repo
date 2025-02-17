@@ -134,9 +134,12 @@ jobs:
       uses: microsoft/powerplatform-actions/import-solution@main
       with:
         environment-url: ${{ inputs.BUILD_ENVIRONMENT_URL }}
-        app-id: ${{ inputs.CLIENT_ID }}
-        client-secret: ${{ secrets.envSecret }}
-        tenant-id: ${{ inputs.TENANT_ID }}
+        # app-id: ${{ inputs.CLIENT_ID }}
+        # client-secret: ${{ secrets.envSecret }}
+        # tenant-id: ${{ inputs.TENANT_ID }}
+        app-id: '94e95571-a37c-432e-bae6-1ae9671a4983'
+        client-secret: '7af6a744-25d6-4845-9153-efd4378b7b02'
+        tenant-id: '302edaf0-65d6-449a-a796-b83cfb733f0d'
         solution-file: ${{ inputs.solution_outbound_folder }}/${{ inputs.solution_name }}.zip
         force-overwrite: true
         publish-changes: true
