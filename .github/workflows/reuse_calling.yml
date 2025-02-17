@@ -116,21 +116,6 @@ jobs:
         name: managedSolutions
         path: ${{ inputs.solution_release_folder }}
 
-    - name: Add PAC CLI to PATH (For Production)
-      run: |
-        echo "C:\Program Files\Power Platform CLI" | Out-File -FilePath $env:GITHUB_PATH -Append
-        $env:Path += ";C:\Program Files\Power Platform CLI"
-        pac --version  # Verify installation
-
-    - name: Authenticate with PAC CLI (Production Environment)
-      run: |
-        pac auth create --name "ProdEnv" `
-          --url "${{ inputs.PRODUCTION_ENVIRONMENT_URL }}" `
-          --applicationId "${{ inputs.CLIENT_ID }}" `
-          --clientSecret "${{ secrets.envSecret }}" `
-          --tenant "${{ inputs.TENANT_ID }}"
-
-
     - name: Import solution to prod env
       uses: microsoft/powerplatform-actions/import-solution@v0
       with:
