@@ -59,19 +59,17 @@ jobs:
 
 
     - name: Install Power Platform CLI
-      run: |
-        Install-Module -Name Microsoft.PowerPlatform.Cds.Client -Force -AllowClobber
-        Import-Module Microsoft.PowerPlatform.Cds.Client
-        $Env:Path += ";C:\Program Files\WindowsPowerShell\Modules\Microsoft.PowerPlatform.Cds.Client"
-      shell: powershell
+      uses: microsoft/powerplatform-actions/setup@v1
+
+    - name: Verify Power Platform CLI installation
+      run: pac --version
+      shell: pwsh
 
     # - name: Add Power Platform CLI to PATH
     #   shell: powershell
     #   run: |
     #     $env:Path += ";C:\Program Files\PowerShell\7\Modules\Microsoft.PowerPlatform.Cds.Client\"
-    - name: Verify Power Platform CLI installation
-      shell: powershell
-      run: pac --version
+
     - name: Authenticate with Power Platform
       shell: pwsh
       run: |
