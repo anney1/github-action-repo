@@ -65,10 +65,6 @@ jobs:
         $Env:Path += ";C:\Program Files\WindowsPowerShell\Modules\Microsoft.PowerPlatform.Cds.Client"
       shell: powershell
 
-    - name: Verify Power Platform CLI installation
-      run: pac --version
-      shell: powershell
-
     # - name: Add Power Platform CLI to PATH
     #   shell: powershell
     #   run: |
