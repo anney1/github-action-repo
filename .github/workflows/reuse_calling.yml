@@ -56,73 +56,10 @@ jobs:
       with:
         lfs: true
 
-    # - name: Install Git LFS
-    #   run: |
-    #     git lfs install
-
+   
     - name: Install Power Platform CLI (PAC)
       uses: microsoft/powerplatform-actions/actions-install@v1
-      # id: install-pac
-    # - name: Find PAC CLI Path
-    #   run: |
-    #     $pacPath = Get-Command pac | Select-Object -ExpandProperty Source
-    #     echo "PAC found at: $pacPath"
-    #     echo "Adding PAC CLI path to environment..."
-    #     echo "$(Split-Path $pacPath)" | Out-File -FilePath $env:GITHUB_PATH -Append
-
-    # - name: Verify PAC CLI Installation
-    #   run: |
-    #     $env:Path += ";C:\Program Files (x86)\Microsoft Power Platform CLI"
-    #     pac --version
-
-    # - name: Authenticate with PAC CLI (Build Environment)
-    #   run: |
-    #     pac auth create --name "BuildEnv" `
-    #       --url "${{ inputs.BUILD_ENVIRONMENT_URL }}" `
-    #       --applicationId "${{ inputs.CLIENT_ID }}" `
-    #       --clientSecret "${{ secrets.envSecret }}" `
-    #       --tenant "${{ inputs.TENANT_ID }}"
-
-    # - name: Install Power Platform CLI
-    #   run: |
-    #     Invoke-WebRequest -Uri https://aka.ms/powerplatform-vscode -OutFile powerplatform-vscode.msi
-    #     Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
-    #     $env:Path += ";C:\Program Files\WindowsPowerShell\Modules"
-
-    # - name: Checkout gitsol branch for workflow files
-    #   uses: actions/checkout@v3
-    #   with:
-    #     ref: gitsol-20250214-1206
-
-      # with:
-      #   lfs: true
-
-    # - name: Setup Power Platform CLI
-    #   uses: ./.github/actions/set-pac-path
       
-    # - name: Install Power Platform CLI
-    #   uses: microsoft/powerplatform-actions/setup@v1
-
-    # - name: Verify Power Platform CLI installation
-    #   run: pac --version
-    #   shell: pwsh
-
-    # - name: Add Power Platform CLI to PATH
-    #   shell: powershell
-    #   run: |
-    #     $env:Path += ";C:\Program Files\PowerShell\7\Modules\Microsoft.PowerPlatform.Cds.Client\"
-
-    # - name: Authenticate with Power Platform
-    #   shell: pwsh
-    #   run: |
-    #     pac auth create --url ${{ inputs.BUILD_ENVIRONMENT_URL }} --applicationId ${{ inputs.CLIENT_ID }} --clientSecret ${{ secrets.envSecret }} --tenant ${{ inputs.TENANT_ID }}
-
-    # - name: Debug repository contents to check the folder structure
-    #   run: ls -R
-
-    # - name: Debug solution folder structure
-    #   run: ls -R ${{ inputs.solution_source_folder }}/${{ inputs.solution_name }}
-
     - name: Pack solution
       uses: microsoft/powerplatform-actions/pack-solution@main
       with:
@@ -133,10 +70,11 @@ jobs:
     - name: Import solution as unmanaged to build env
       uses: microsoft/powerplatform-actions/import-solution@main
       with:
-        environment-url: ${{ inputs.BUILD_ENVIRONMENT_URL }}
+        # environment-url: ${{ inputs.BUILD_ENVIRONMENT_URL }}
         # app-id: ${{ inputs.CLIENT_ID }}
         # client-secret: ${{ secrets.envSecret }}
         # tenant-id: ${{ inputs.TENANT_ID }}
+        environment-url: 'https://org5569b62d.crm15.dynamics.com'
         app-id: '94e95571-a37c-432e-bae6-1ae9671a4983'
         client-secret: 'Icm8Q~DW6gqGm1Cn8CO02HaiHTgnYfh_lCla5bU1'
         tenant-id: '302edaf0-65d6-449a-a796-b83cfb733f0d'
