@@ -51,14 +51,26 @@ jobs:
       RUNNER_DEBUG: 1
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout main branch for custom actions
+      uses: actions/checkout@v3
+      with:
+        ref: main
+
+    - name: Setup Power Platform CLI
+      uses: ./.github/actions/setup-pac
+
+    - name: Checkout gitsol branch for workflow files
+      uses: actions/checkout@v3
       with:
         ref: gitsol-20250214-1206
+    # - uses: actions/checkout@v3
+    #   with:
+    #     ref: gitsol-20250214-1206
       # with:
       #   lfs: true
 
-    - name: Setup Power Platform CLI
-      uses: ./.github/actions/set-pac-path
+    # - name: Setup Power Platform CLI
+    #   uses: ./.github/actions/set-pac-path
       
     # - name: Install Power Platform CLI
     #   uses: microsoft/powerplatform-actions/setup@v1
