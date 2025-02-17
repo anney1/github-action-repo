@@ -60,7 +60,7 @@ jobs:
         pac auth create --url ${{ secrets.DEV_ENV }} --applicationId ${{ secrets.CLIENT_ID }} --clientSecret ${{ secrets.envSecret }} --tenant ${{ secrets.TENANT_ID }}
 
     - name: Pack solution
-      uses: microsoft/powerplatform-actions/pack-solution@v0.1.0
+      uses: microsoft/powerplatform-actions/pack-solution@v0
       with:
         solution-folder: ${{ inputs.solution_source_folder }}/${{ inputs.solution_name }}  # Use input for solution folder
         solution-file: ${{ inputs.solution_outbound_folder }}/${{ inputs.solution_name }}.zip  # Use input for solution file
