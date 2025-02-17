@@ -57,7 +57,15 @@ jobs:
         ref: main
 
     - name: Setup Power Platform CLI
-      uses: ./.github/actions/set-pac-path
+      run: |
+        Invoke-WebRequest -Uri https://aka.ms/powerplatform-vscode -OutFile powerplatform-vscode.msi
+        Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
+        echo "C:\\Program Files\\Power Platform\\Tools" | Out-File -FilePath $Env:GITHUB_PATH -Encoding utf8
+      shell: powershell
+
+    - name: Verify Power Platform CLI installation
+      run: pac --version
+      shell: powershell
 
     - name: Checkout gitsol branch for workflow files
       uses: actions/checkout@v3
