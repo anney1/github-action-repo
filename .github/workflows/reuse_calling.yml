@@ -55,6 +55,19 @@ jobs:
         ref: gitsol-20250214-1206
       # with:
       #   lfs: true
+
+    - name: Install PAC CLI
+      uses: microsoft/powerplatform-actions/actions-install@v1  # Install PAC CLI
+      id: install-pac
+
+    - name: Debug repository contents
+      run: |
+        ls -R
+
+    - name: Debug solution folder structure
+      run: |
+        ls -R ${{ inputs.solution_source_folder }}/${{ inputs.solution_name }}
+      
     - name: Authenticate to Power Platform environment
       run: |
         pac auth create --url ${{ secrets.DEV_ENV }} --applicationId ${{ secrets.CLIENT_ID }} --clientSecret ${{ secrets.envSecret }} --tenant ${{ secrets.TENANT_ID }}
