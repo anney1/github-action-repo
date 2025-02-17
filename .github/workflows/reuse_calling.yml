@@ -63,12 +63,17 @@ jobs:
     - name: Install Power Platform CLI (PAC)
       uses: microsoft/powerplatform-actions/actions-install@v1
       id: install-pac
-
-    - name: Add PAC CLI to PATH
+    - name: Find PAC CLI Path
       run: |
-        echo "C:\Program Files\Power Platform CLI" | Out-File -FilePath $env:GITHUB_PATH -Append
-        $env:Path += ";C:\Program Files\Power Platform CLI"
-        pac --version  # Verify installation
+        $pacPath = Get-Command pac | Select-Object -ExpandProperty Source
+        echo "PAC found at: $pacPath"
+        echo "Adding PAC CLI path to environment..."
+        echo "$(Split-Path $pacPath)" | Out-File -FilePath $env:GITHUB_PATH -Append
+
+    - name: Verify PAC CLI Installation
+      run: |
+        $env:Path += ";C:\Program Files (x86)\Microsoft Power Platform CLI"
+        pac --version
 
     - name: Authenticate with PAC CLI (Build Environment)
       run: |
