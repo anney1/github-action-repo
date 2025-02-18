@@ -20,8 +20,9 @@ jobs:
       # CLIENT_ID: '94e95571-a37c-432e-bae6-1ae9671a4983'
       # TENANT_ID: '302edaf0-65d6-449a-a796-b83cfb733f0d'    
     secrets:
-      envSecret: ${{ secrets.ENVSECRET }}
+      
       BUILD_ENVIRONMENT_URL: ${{ secrets.BUILD_ENV }}
       PRODUCTION_ENVIRONMENT_URL: ${{ secrets.PROD_ENV }}
       CLIENT_ID: ${{ secrets.CLIENT_ID }}
       TENANT_ID: ${{ secrets.TENANT_ID }}
+      envSecret: ${{ secrets.ENVSECRET }}
