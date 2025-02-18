@@ -127,6 +127,8 @@ jobs:
       with:
         # lfs: true
         token: ${{ secrets.GH_TOKEN }}
+    - name: Install Power Platform CLI (PAC)
+      uses: microsoft/powerplatform-actions/actions-install@v1
     - name: Fetch the ready to ship solution from GH artifact store
       uses: actions/download-artifact@v4
       with:
@@ -134,7 +136,7 @@ jobs:
         path: ${{ inputs.solution_release_folder }}
 
     - name: Import solution to prod env
-      uses: microsoft/powerplatform-actions/import-solution@main
+      uses: microsoft/powerplatform-actions/import-solution@v1
       with:
         environment-url: ${{ inputs.PRODUCTION_ENVIRONMENT_URL }}
         app-id: ${{ secrets.CLIENT_ID }}
