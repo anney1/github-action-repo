@@ -81,10 +81,10 @@ jobs:
         # client-secret: 'Icm8Q~DW6gqGm1Cn8CO02HaiHTgnYfh_lCla5bU1'
         # tenant-id: '302edaf0-65d6-449a-a796-b83cfb733f0d'
         
-        environment-url: ${{ secrets.BUILD_ENVIRONMENT_URL }}
-        app-id: ${{ secrets.CLIENT_ID }}
+        environment-url: ${{ inputs.BUILD_ENVIRONMENT_URL }}
+        app-id: ${{ inputs.CLIENT_ID }}
         client-secret: ${{ secrets.envSecret }}
-        tenant-id: ${{ secrets.TENANT_ID }}
+        tenant-id: ${{ inputs.TENANT_ID }}
       
         solution-file: ${{ inputs.solution_outbound_folder }}/${{ inputs.solution_name }}.zip
         force-overwrite: true
@@ -93,10 +93,10 @@ jobs:
     - name: Export solution as managed
       uses: microsoft/powerplatform-actions/export-solution@main
       with:
-        environment-url: ${{ secrets.BUILD_ENVIRONMENT_URL }}
-        app-id: ${{ secrets.CLIENT_ID }}
+        environment-url: ${{ inputs.BUILD_ENVIRONMENT_URL }}
+        app-id: ${{ inputs.CLIENT_ID }}
         client-secret: ${{ secrets.envSecret }}
-        tenant-id: ${{ secrets.TENANT_ID }}
+        tenant-id: ${{ inputs.TENANT_ID }}
   
         solution-name: ${{ inputs.solution_name }}
         managed: true
@@ -128,10 +128,10 @@ jobs:
     - name: Import solution to prod env
       uses: microsoft/powerplatform-actions/import-solution@v1
       with:
-        environment-url: ${{ secrets.PRODUCTION_ENVIRONMENT_URL }}
-        app-id: ${{ secrets.CLIENT_ID }}
+        environment-url: ${{ inputs.PRODUCTION_ENVIRONMENT_URL }}
+        app-id: ${{ inputs.CLIENT_ID }}
         client-secret: ${{ secrets.envSecret }}
-        tenant-id: ${{ secrets.TENANT_ID }}
+        tenant-id: ${{ inputs.TENANT_ID }}
         solution-file: ${{ inputs.solution_release_folder }}/${{ inputs.solution_name }}_managed.zip
         force-overwrite: true
         publish-changes: true
