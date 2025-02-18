@@ -31,17 +31,22 @@ on:
         description: 'Prod Env URL'
         type: string
         required: true
+      # CLIENT_ID:
+      #   description: 'The client id'
+      #   type: string
+      #   required: true
+      # TENANT_ID:
+      #   description: 'The tenant id'
+      #   type: string
+      #   required: true
+
+    secrets:
       CLIENT_ID:
         description: 'The client id'
-        type: string
         required: true
       TENANT_ID:
         description: 'The tenant id'
-        type: string
         required: true
-
-    secrets:
-    
       envSecret:
         description: 'The secret value for authentication using SPN'
         required: true
@@ -85,9 +90,9 @@ jobs:
         # tenant-id: '302edaf0-65d6-449a-a796-b83cfb733f0d'
         
         environment-url: ${{ inputs.BUILD_ENVIRONMENT_URL }}
-        app-id: ${{ inputs.CLIENT_ID }}
+        app-id: ${{ secrets.CLIENT_ID }}
         client-secret: ${{ secrets.envSecret }}
-        tenant-id: ${{ inputs.TENANT_ID }}
+        tenant-id: ${{ secrets.TENANT_ID }}
       
         solution-file: ${{ inputs.solution_outbound_folder }}/${{ inputs.solution_name }}.zip
         force-overwrite: true
@@ -97,9 +102,9 @@ jobs:
       uses: microsoft/powerplatform-actions/export-solution@main
       with:
         environment-url: ${{ inputs.BUILD_ENVIRONMENT_URL }}
-        app-id: ${{ inputs.CLIENT_ID }}
+        app-id: ${{ secrets.CLIENT_ID }}
         client-secret: ${{ secrets.envSecret }}
-        tenant-id: ${{ inputs.TENANT_ID }}
+        tenant-id: ${{ secrets.TENANT_ID }}
   
         solution-name: ${{ inputs.solution_name }}
         managed: true
@@ -132,9 +137,9 @@ jobs:
       uses: microsoft/powerplatform-actions/import-solution@main
       with:
         environment-url: ${{ inputs.PRODUCTION_ENVIRONMENT_URL }}
-        app-id: ${{ inputs.CLIENT_ID }}
+        app-id: ${{ secrets.CLIENT_ID }}
         client-secret: ${{ secrets.envSecret }}
-        tenant-id: ${{ inputs.TENANT_ID }}
+        tenant-id: ${{ secrets.TENANT_ID }}
         solution-file: ${{ inputs.solution_release_folder }}/${{ inputs.solution_name }}_managed.zip
         force-overwrite: true
         publish-changes: true
