@@ -3,11 +3,11 @@ name: Release action
 # Release your solution to prod when you create a new release.
 
 on:
-  workflow_dispatch:
-  # release:
-  #     types: [created]        
-# permissions:
-#   contents: write
+  # workflow_dispatch:
+  release:
+      types: [created]        
+permissions:
+  contents: write
 jobs:
   Release-solution-gitsol:
     uses: ./.github/workflows/reuse_calling.yml
