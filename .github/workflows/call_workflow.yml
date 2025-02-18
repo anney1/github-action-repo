@@ -27,3 +27,4 @@ jobs:
       # TENANT_ID: ${{ secrets.TENANT_ID }}
       
       envSecret: ${{ secrets.ENVSECRET }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
