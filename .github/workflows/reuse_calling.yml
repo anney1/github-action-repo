@@ -23,6 +23,23 @@ on:
         description: 'folder where the released binaries are going to be hosted *do not change*'
         type: string
         default: out/release
+      # BUILD_ENVIRONMENT_URL:
+      #   description: 'Build environment url.'
+      #   type: string
+      #   required: true
+      # PRODUCTION_ENVIRONMENT_URL:
+      #   description: 'Prod Env URL'
+      #   type: string
+      #   required: true
+      # CLIENT_ID:
+      #   description: 'The client id'
+      #   type: string
+      #   required: true
+      # TENANT_ID:
+      #   description: 'The tenant id'
+      #   type: string
+      #   required: true
+      env:
       BUILD_ENVIRONMENT_URL:
         description: 'Build environment url.'
         type: string
@@ -39,7 +56,7 @@ on:
         description: 'The tenant id'
         type: string
         required: true
-    secrets:
+        secrets:
       envSecret:
         description: 'The secret value for authentication using SPN'
         required: true
