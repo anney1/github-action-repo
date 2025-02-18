@@ -1,0 +1,116 @@
+name: Approval_export-and-branch-solution
+
+on:
+  workflow_dispatch:
+    inputs:
+      solution_name:
+        description: 'Name of the solution to work on from Power Platform'
+        required: true
+        default: app_sol
+      solution_exported_folder:
+        description: 'Folder name for staging the exported solution *do not change*'
+        required: true
+        default: out/exported/
+      solution_folder:
+        description: 'Staging the unpacked solution folder before check-in *do not change*'
+        required: true
+        default: out/solutions/
+      solution_target_folder:
+        description: 'Folder name to be created and checked in *do not change*'
+        required: true
+        default: solutions/
+
+env:
+  ENVIRONMENT_URL: secrets.DEV_ENV
+  CLIENT_ID: secrets.CLIENT_ID
+  TENANT_ID: secrets.TENANT_ID
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  export-from-dev:
+    runs-on: windows-latest
+    env:
+      RUNNER_DEBUG: 1
+    steps:
+      - uses: actions/checkout@v3  # Use the latest version of checkout action
+        with:
+          lfs: true
+
+      - name: Install Power Platform CLI
+        run: |
+          Invoke-WebRequest -Uri https://aka.ms/powerplatform-vscode -OutFile powerplatform-vscode.msi
+          Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
+          $env:Path += ";C:\Program Files\WindowsPowerShell\Modules"
+
+      - name: Install PAC CLI
+        uses: microsoft/powerplatform-actions/actions-install@v1  # Install PAC CLI
+        id: install-pac
+
+      - name: Authenticate with Power Platform
+        uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
+        with:
+          environment-url: ${{ secrets.DEV_ENV }}
+          app-id: ${{ secrets.CLIENT_ID }}
+          client-secret: ${{ secrets.Client_SPN }}
+          tenant-id: ${{secrets.TENANT_ID}}
+
+      - name: Export Solution from Power Platform
+        uses: microsoft/powerplatform-actions/export-solution@v1  # Use latest available version
+        with:
+          environment-url: ${{ secrets.DEV_ENV }}
+          app-id: ${{ secrets.CLIENT_ID }}
+          client-secret: ${{ secrets.Client_SPN }}
+          tenant-id: ${{secrets.TENANT_ID}}
+          solution-name: app_sol
+          solution-output-file: out/exported/app_sol.zip
+
+      - name: Unpack Solution
+        uses: microsoft/powerplatform-actions/unpack-solution@v1  # Use latest available version
+        with:
+          solution-file: out/exported/app_sol.zip
+          solution-folder: out/solutions/app_sol
+          solution-type: 'Unmanaged'
+          overwrite-files: true
+
+      - name: Branch Solution
+        uses: microsoft/powerplatform-actions/branch-solution@v1  # Use latest available version
+        with:
+          solution-folder: out/solutions/app_sol
+          solution-target-folder: solutions/app_sol
+          repo-token: ${{ secrets.GH_TOKEN }}
+          allow-empty-commit: true
+
+  wait-for-approval:
+    needs: [export-from-dev]
+    runs-on: ubuntu-latest
+    environment: production  # Enables manual approval in GitHub UI
+    steps:
+      - name: Request Manual Approval
+        run: echo "Waiting for approval from muhammadbilal.saeed@systemsltd.com before merging..."
+
+  merge-to-main:
+    needs: [wait-for-approval]
+    runs-on: ubuntu-latest
+    if: github.actor == 'muhammadbilal.saeed@systemsltd.com'  # Restricts merging to specific user
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Merge to Main
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            github.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+              merge_method: "squash"
+            });
+
+      - name: Notify Merge Completion
+        run: echo "Pull request #${{ github.event.pull_request.number }} has been merged successfully."
