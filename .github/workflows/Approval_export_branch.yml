@@ -1,4 +1,4 @@
-name: export-and-branch-solution
+name: approval-export-and-branch-solution
 
 on:
   pull_request:
@@ -50,21 +50,21 @@ jobs:
         client-secret: ${{ secrets.Client_SPN }}
         tenant-id: ${{ secrets.TENANT_ID }}
         solution-name: gitsol
-        solution-output-file: out/exported/gitsol.zip
+        solution-output-file: out/exported/app_sol.zip
 
     - name: Unpack Solution
       uses: microsoft/powerplatform-actions/unpack-solution@v1
       with:
-        solution-file: out/exported/gitsol.zip
-        solution-folder: out/solutions/gitsol
+        solution-file: out/exported/app_sol.zip
+        solution-folder: out/solutions/app_sol
         solution-type: 'Unmanaged'
         overwrite-files: true
 
     - name: Branch Solution
       uses: microsoft/powerplatform-actions/branch-solution@v1
       with:
-        solution-folder: out/solutions/gitsol
-        solution-target-folder: solutions/gitsol
+        solution-folder: out/solutions/app_sol
+        solution-target-folder: solutions/app_sol
         repo-token: ${{ secrets.GH_TOKEN }}
         allow-empty-commit: true
 
