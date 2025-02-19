@@ -1,9 +1,24 @@
 name: approval-export-and-branch-solution
 
 on:
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      solution_name:
+        description: 'Name of the solution to work on from Power Platform'
+        required: true
+        default: app_sol
+      solution_exported_folder:
+        description: 'Folder name for staging the exported solution *do not change*'
+        required: true
+        default: out/exported/
+      solution_folder:
+        description: 'Staging the unpacked solution folder before check-in *do not change*'
+        required: true
+        default: out/solutions/
+      solution_target_folder:
+        description: 'Folder name to be created and checked in *do not change*'
+        required: true
+        default: solutions/
 
 env:
   ENVIRONMENT_URL: secrets.DEV_ENV
@@ -49,46 +64,48 @@ jobs:
         app-id: ${{ secrets.CLIENT_ID }}
         client-secret: ${{ secrets.Client_SPN }}
         tenant-id: ${{ secrets.TENANT_ID }}
-        solution-name: gitsol
-        solution-output-file: out/exported/app_sol.zip
+        solution-name: ${{ github.event.inputs.solution_name }}
+        solution-output-file: ${{ github.event.inputs.solution_exported_folder }}app_sol.zip
 
     - name: Unpack Solution
       uses: microsoft/powerplatform-actions/unpack-solution@v1
       with:
-        solution-file: out/exported/app_sol.zip
-        solution-folder: out/solutions/app_sol
+        solution-file: ${{ github.event.inputs.solution_exported_folder }}app_sol.zip
+        solution-folder: ${{ github.event.inputs.solution_folder }}app_sol
         solution-type: 'Unmanaged'
         overwrite-files: true
 
     - name: Branch Solution
       uses: microsoft/powerplatform-actions/branch-solution@v1
       with:
-        solution-folder: out/solutions/app_sol
-        solution-target-folder: solutions/app_sol
+        solution-folder: ${{ github.event.inputs.solution_folder }}app_sol
+        solution-target-folder: ${{ github.event.inputs.solution_target_folder }}app_sol
         repo-token: ${{ secrets.GH_TOKEN }}
         allow-empty-commit: true
 
   wait-for-approval:
     needs: [export-from-dev]
     runs-on: ubuntu-latest
-    environment: production  # Triggers approval in GitHub UI
+    environment: production  # Requires manual approval
     steps:
       - name: Request Manual Approval
         run: echo "Waiting for approval from abcd@hotmail.com before merging..."
-  
+
   merge-to-main:
     needs: [wait-for-approval]
     runs-on: ubuntu-latest
-    if: github.actor == 'mainbilalg1@gmail.com'  # Ensure only this user can merge
+    if: github.actor == 'mainbilalg1@gmail.com'  # Ensures only this user can approve and merge
     steps:
       - name: Merge Pull Request
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GH_TOKEN }}
           script: |
+            const { owner, repo } = context.repo;
+            const pull_number = context.payload.pull_request.number;
             github.pulls.merge({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
+              owner: owner,
+              repo: repo,
+              pull_number: pull_number,
               merge_method: "squash"
-            })
+            });
