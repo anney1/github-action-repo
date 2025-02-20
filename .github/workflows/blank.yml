@@ -53,7 +53,7 @@ jobs:
       with:
         environment-url: ${{ env.DEV_ENV }}
         app-id: ${{ secrets.CLIENT_ID }}
-        client-secret: ${{ secrets.Client_SPN }}
+        client-secret: ${{ secrets.CLIENT_SPN }}
         tenant-id: ${{secrets.TENANT_ID}}
 
     - name: export-solution action
@@ -61,7 +61,7 @@ jobs:
       with:
         environment-url: ${{ env.DEV_ENV }}
         app-id: ${{ secrets.CLIENT_ID }}
-        client-secret: ${{ secrets.Client_SPN }}
+        client-secret: ${{ secrets.CLIENT_SPN }}
         tenant-id: ${{secrets.TENANT_ID}}
         solution-name: gitsol
         solution-output-file: out/exported/appsol.zip
