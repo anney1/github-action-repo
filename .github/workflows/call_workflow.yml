@@ -13,7 +13,7 @@ jobs:
     uses: ./.github/workflows/reuse_calling.yml
     with:
       #You can specify the solution name here
-      solution_name: app_sol
+      solution_name: gitsol
       # Update your values here
       BUILD_ENVIRONMENT_URL: 'https://org5569b62d.crm15.dynamics.com'
       PRODUCTION_ENVIRONMENT_URL: 'https://orgdc49fd0d.crm15.dynamics.com'
