@@ -7,105 +7,108 @@ on:
         description: 'Name of the solution to work on from Power Platform'
         required: true
         default: app_sol
-      solution_exported_folder:
-        description: 'Folder name for staging the exported solution *do not change*'
-        required: true
-        default: out/exported/
-      solution_folder:
-        description: 'Staging the unpacked solution folder before check-in *do not change*'
-        required: true
-        default: out/solutions/
-      solution_target_folder:
-        description: 'Folder name to be created and checked in *do not change*'
-        required: true
-        default: solutions/
-
-env:
-  ENVIRONMENT_URL: secrets.DEV_ENV
-  CLIENT_ID: secrets.CLIENT_ID
-  TENANT_ID: secrets.TENANT_ID
 
 permissions:
   contents: write
-  pull-requests: write  # Allow PR updates
+  pull-requests: write
 
 jobs:
   export-from-dev:
     runs-on: windows-latest
-    env:
-      RUNNER_DEBUG: 1
     steps:
-    - uses: actions/checkout@v3
-      with:
-        lfs: true
+      - uses: actions/checkout@v3
 
-    - name: Install Power Platform CLI
-      run: |
-        Invoke-WebRequest -Uri https://aka.ms/powerplatform-vscode -OutFile powerplatform-vscode.msi
-        Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
-        $env:Path += ";C:\Program Files\WindowsPowerShell\Modules"
+      - name: Install Power Platform CLI
+        run: |
+          Invoke-WebRequest -Uri https://aka.ms/powerplatform-vscode -OutFile powerplatform-vscode.msi
+          Start-Process msiexec.exe -Wait -ArgumentList '/I powerplatform-vscode.msi /quiet /norestart'
 
-    - name: Install PAC CLI
-      uses: microsoft/powerplatform-actions/actions-install@v1
-      id: install-pac
+      - name: Install PAC CLI
+        uses: microsoft/powerplatform-actions/actions-install@v1
 
-    - name: Who-Am-I
-      uses: microsoft/powerplatform-actions/who-am-i@v1
-      with:
-        environment-url: ${{ secrets.DEV_ENV }}
-        app-id: ${{ secrets.CLIENT_ID }}
-        client-secret: ${{ secrets.Client_SPN }}
-        tenant-id: ${{ secrets.TENANT_ID }}
-
-    - name: Export Solution
-      uses: microsoft/powerplatform-actions/export-solution@v1
-      with:
-        environment-url: ${{ secrets.DEV_ENV }}
-        app-id: ${{ secrets.CLIENT_ID }}
-        client-secret: ${{ secrets.Client_SPN }}
-        tenant-id: ${{ secrets.TENANT_ID }}
-        solution-name: ${{ github.event.inputs.solution_name }}
-        solution-output-file: ${{ github.event.inputs.solution_exported_folder }}app_sol.zip
-
-    - name: Unpack Solution
-      uses: microsoft/powerplatform-actions/unpack-solution@v1
-      with:
-        solution-file: ${{ github.event.inputs.solution_exported_folder }}app_sol.zip
-        solution-folder: ${{ github.event.inputs.solution_folder }}app_sol
-        solution-type: 'Unmanaged'
-        overwrite-files: true
-
-    - name: Branch Solution
-      uses: microsoft/powerplatform-actions/branch-solution@v1
-      with:
-        solution-folder: ${{ github.event.inputs.solution_folder }}app_sol
-        solution-target-folder: ${{ github.event.inputs.solution_target_folder }}app_sol
-        repo-token: ${{ secrets.GH_TOKEN }}
-        allow-empty-commit: true
-
-  wait-for-approval:
-    needs: [export-from-dev]
-    runs-on: ubuntu-latest
-    environment: production  # Requires manual approval
-    steps:
-      - name: Request Manual Approval
-        run: echo "Waiting for approval from abcd@hotmail.com before merging..."
-
-  merge-to-main:
-    needs: [wait-for-approval]
-    runs-on: ubuntu-latest
-    if: github.actor == 'mainbilalg1@gmail.com'  # Ensures only this user can approve and merge
-    steps:
-      - name: Merge Pull Request
-        uses: actions/github-script@v6
+      - name: export-solution
+        uses: microsoft/powerplatform-actions/export-solution@v1
         with:
-          github-token: ${{ secrets.GH_TOKEN }}
-          script: |
-            const { owner, repo } = context.repo;
-            const pull_number = context.payload.pull_request.number;
-            github.pulls.merge({
-              owner: owner,
-              repo: repo,
-              pull_number: pull_number,
-              merge_method: "squash"
-            });
+          environment-url: ${{ secrets.DEV_ENV }}
+          app-id: ${{ secrets.CLIENT_ID }}
+          client-secret: ${{ secrets.Client_SPN }}
+          tenant-id: ${{ secrets.TENANT_ID }}
+          solution-name: gitsol
+          solution-output-file: out/exported/app_sol.zip
+
+      - name: unpack-solution
+        uses: microsoft/powerplatform-actions/unpack-solution@v1
+        with:
+          solution-file: out/exported/app_sol.zip
+          solution-folder: out/solutions/app_sol
+          solution-type: 'Unmanaged'
+          overwrite-files: true
+
+      - name: branch-solution
+        uses: microsoft/powerplatform-actions/branch-solution@v1
+        with:
+          solution-folder: out/solutions/app_sol
+          solution-target-folder: solutions/app_sol
+          repo-token: ${{ secrets.GH_TOKEN }}
+          allow-empty-commit: true
+
+      - name: Create Pull Request
+        id: create-pr
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          commit-message: "feat: Update solution ${{ inputs.solution_name }}"
+          title: "Update solution ${{ inputs.solution_name }}"
+          body: "This PR updates the solution ${{ inputs.solution_name }} with the latest changes."
+          branch: "update-solution-${{ inputs.solution_name }}"
+          base: main
+          draft: false
+          delete-branch: true
+
+  wait-for-codeowner-approval:
+    runs-on: ubuntu-latest
+    needs: export-from-dev
+    steps:
+      - name: Wait for CodeOwner Approval
+        id: check-approval
+        run: |
+          PR_NUMBER=$(curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls?head=update-solution-${{ inputs.solution_name }}" \
+            | jq -r '.[0].number')
+
+          echo "Checking approval for PR #$PR_NUMBER"
+
+          while true; do
+            REVIEWS=$(curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/reviews")
+
+            APPROVED=$(echo "$REVIEWS" | jq -r '.[] | select(.state=="APPROVED") | .user.login')
+
+            if [[ ! -z "$APPROVED" ]]; then
+              echo "PR Approved by: $APPROVED"
+              break
+            else
+              echo "Waiting for Code Owner approval..."
+              sleep 30  # Check every 30 seconds
+            fi
+          done
+
+  merge-pr:
+    runs-on: ubuntu-latest
+    needs: wait-for-codeowner-approval
+    steps:
+      - name: Get Pull Request Number
+        id: get-pr-number
+        run: |
+          PR_NUMBER=$(curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls?head=update-solution-${{ inputs.solution_name }}" \
+            | jq -r '.[0].number')
+          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+
+      - name: Merge Pull Request
+        run: |
+          curl -X PUT \
+            -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ env.PR_NUMBER }}/merge" \
+            -d '{"merge_method": "merge"}'
