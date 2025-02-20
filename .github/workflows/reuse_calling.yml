@@ -158,7 +158,7 @@ jobs:
 
   
   release-to-staging:
-    needs: [convert-to-managed]
+    needs: [convert-to-managed, send-approval-notification]
     runs-on: windows-latest
     env:
       RUNNER_DEBUG: 1
