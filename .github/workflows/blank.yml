@@ -6,7 +6,7 @@ on:
       solution_name:
         description: 'Name of the solution to work on from Power Platform'
         required: true
-        default: gitsol
+        default: appsol
       solution_exported_folder:
         description: 'Folder name for staging the exported solution *do not change*'
         required: true
@@ -21,7 +21,7 @@ on:
         default: solutions/
 
 env:
-  ENVIRONMENT_URL: secrets.DEV_ENV
+  ENVIRONMENT_URL: env.DEV_ENV
   CLIENT_ID: secrets.CLIENT_ID
   TENANT_ID: secrets.TENANT_ID
 
@@ -51,7 +51,7 @@ jobs:
     - name: who-am-i action
       uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
       with:
-        environment-url: ${{ secrets.DEV_ENV }}
+        environment-url: ${{ env.DEV_ENV }}
         app-id: ${{ secrets.CLIENT_ID }}
         client-secret: ${{ secrets.Client_SPN }}
         tenant-id: ${{secrets.TENANT_ID}}
@@ -59,26 +59,26 @@ jobs:
     - name: export-solution action
       uses: microsoft/powerplatform-actions/export-solution@v1  # Use latest available version
       with:
-        environment-url: ${{ secrets.DEV_ENV }}
+        environment-url: ${{ env.DEV_ENV }}
         app-id: ${{ secrets.CLIENT_ID }}
         client-secret: ${{ secrets.Client_SPN }}
         tenant-id: ${{secrets.TENANT_ID}}
         solution-name: gitsol
-        solution-output-file: out/exported/gitsol.zip
+        solution-output-file: out/exported/appsol.zip
 
     - name: unpack-solution action
       uses: microsoft/powerplatform-actions/unpack-solution@v1  # Use latest available version
       with:
-        solution-file: out/exported/gitsol.zip
-        solution-folder: out/solutions/gitsol
+        solution-file: out/exported/appsol.zip
+        solution-folder: out/solutions/appsol
         solution-type: 'Unmanaged'
         overwrite-files: true
 
     - name: branch-solution, prepare it for a PullRequest
       uses: microsoft/powerplatform-actions/branch-solution@v1  # Use latest available version
       with:
-        solution-folder: out/solutions/gitsol
-        solution-target-folder: solutions/gitsol
+        solution-folder: out/solutions/appsol
+        solution-target-folder: solutions/appsol
         repo-token: ${{ secrets.GH_TOKEN }}
         allow-empty-commit: true
     
