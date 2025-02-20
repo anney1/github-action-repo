@@ -6,7 +6,7 @@ on:
       solution_name:
         description: 'The solution name.'
         type: string
-        default: gitsol
+        default: app_sol
       solution_shipping_folder:
         description: 'folder name for staging the exported solution *do not change*'
         type: string
@@ -115,6 +115,27 @@ jobs:
       with:
         name: managedSolutions
         path: ${{ inputs.solution_shipping_folder }}
+
+  approval:
+    needs: [convert-to-managed]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Request Approval
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { Octokit } = require("@octokit/rest");
+          const octokit = new Octokit({ auth: process.env.GH_TOKEN });
+          const { data: { id } } = await octokit.actions.createWorkflowDispatch({
+            owner: "anney1",
+            repo: "github-action-repo",
+            workflow_id: 'reuse_calling.yml',
+            ref: context.ref,
+            inputs: {
+              approve: 'true'
+            }
+          });
+          console.log(`Approval requested: ${id}`);
 
   release-to-staging:
     needs: [convert-to-managed]
