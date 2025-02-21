@@ -6,7 +6,7 @@ on:
       solution_name:
         description: 'The solution name.'
         type: string
-        default: gitsol
+        default: app_sol
       solution_shipping_folder:
         description: 'folder name for staging the exported solution *do not change*'
         type: string
@@ -90,9 +90,9 @@ jobs:
         # tenant-id: '302edaf0-65d6-449a-a796-b83cfb733f0d'
         
         environment-url: ${{ inputs.BUILD_ENVIRONMENT_URL }}
-        app-id: ${{ secrets.CLIENT_ID }}
+        app-id: ${{ vars.VAR_CLIENT }}
         client-secret: ${{ secrets.envSecret }}
-        tenant-id: ${{ secrets.TENANT_ID }}
+        tenant-id: ${{ vars.VAR_TENANT }}
       
         solution-file: ${{ inputs.solution_outbound_folder }}/${{ inputs.solution_name }}.zip
         force-overwrite: true
@@ -102,9 +102,9 @@ jobs:
       uses: microsoft/powerplatform-actions/export-solution@main
       with:
         environment-url: ${{ inputs.BUILD_ENVIRONMENT_URL }}
-        app-id: ${{ secrets.CLIENT_ID }}
+        app-id: ${{ vars.VAR_CLIENT }}
         client-secret: ${{ secrets.envSecret }}
-        tenant-id: ${{ secrets.TENANT_ID }}
+        tenant-id: ${{ vars.VAR_TENANT }}
   
         solution-name: ${{ inputs.solution_name }}
         managed: true
@@ -116,49 +116,9 @@ jobs:
         name: managedSolutions
         path: ${{ inputs.solution_shipping_folder }}
 
-  wait-for-codeowner-approval:
-    needs: [convert-to-managed]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Wait for CodeOwner Approval
-        id: check-approval
-        run: |
-          PR_NUMBER=$(curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/pulls?head=update-solution-${{ inputs.solution_name }}" \
-            | jq -r '.[0].number')
-
-          echo "Checking approval for PR #$PR_NUMBER"
-
-          while true; do
-            REVIEWS=$(curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-              "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/reviews")
-
-            APPROVED=$(echo "$REVIEWS" | jq -r '.[] | select(.state=="APPROVED") | .user.login')
-
-            if [[ ! -z "$APPROVED" ]]; then
-              echo "PR Approved by: $APPROVED"
-              break
-            else
-              echo "Waiting for Code Owner approval..."
-              sleep 30  # Check every 30 seconds
-            fi
-          done
-
-  send-approval-notification:
-    needs: [convert-to-managed]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Notify CODEOWNER for Approval
-        run: |
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -d "{\"body\": \"@CODEOWNERS Approval required for release to production.\"}" \
-            "https://api.github.com/repos/${{ github.repository }}/issues/${{ env.PR_NUMBER }}/comments"
-
   
   release-to-staging:
-    needs: [convert-to-managed, send-approval-notification]
+
     runs-on: windows-latest
     env:
       RUNNER_DEBUG: 1
@@ -180,9 +140,9 @@ jobs:
       uses: microsoft/powerplatform-actions/import-solution@v1
       with:
         environment-url: ${{ inputs.PRODUCTION_ENVIRONMENT_URL }}
-        app-id: ${{ secrets.CLIENT_ID }}
+        app-id: ${{ vars.VAR_CLIENT }}
         client-secret: ${{ secrets.envSecret }}
-        tenant-id: ${{ secrets.TENANT_ID }}
+        tenant-id: ${{ vars.VAR_TENANT }}
         solution-file: ${{ inputs.solution_release_folder }}/${{ inputs.solution_name }}_managed.zip
         force-overwrite: true
         publish-changes: true
