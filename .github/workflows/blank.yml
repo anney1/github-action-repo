@@ -21,7 +21,7 @@ on:
         default: solutions/
 
 env:
-  ENVIRONMENT_URL: env.DEV_ENV
+  ENVIRONMENT_URL: secrets.DEV_ENV
   CLIENT_ID: secrets.CLIENT_ID
   TENANT_ID: secrets.TENANT_ID
 
@@ -51,7 +51,7 @@ jobs:
     - name: who-am-i action
       uses: microsoft/powerplatform-actions/who-am-i@v1  # Use latest available version
       with:
-        environment-url: ${{ env.DEV_ENV }}
+        environment-url: ${{ secrets.DEV_ENV }}
         app-id: ${{ secrets.CLIENT_ID }}
         client-secret: ${{ secrets.CLIENT_SPN }}
         tenant-id: ${{secrets.TENANT_ID}}
@@ -59,7 +59,7 @@ jobs:
     - name: export-solution action
       uses: microsoft/powerplatform-actions/export-solution@v1  # Use latest available version
       with:
-        environment-url: ${{ env.DEV_ENV }}
+        environment-url: ${{ secrets.DEV_ENV }}
         app-id: ${{ secrets.CLIENT_ID }}
         client-secret: ${{ secrets.CLIENT_SPN }}
         tenant-id: ${{secrets.TENANT_ID}}
