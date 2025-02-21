@@ -13,18 +13,20 @@ jobs:
     uses: ./.github/workflows/Solution_Redeploy.yml
     with:
       #You can specify the solution name here
-      solution_name: gitsol
+      solution_name: app_sol
       # Update your values here
-      BUILD_ENVIRONMENT_URL: 'https://org5569b62d.crm15.dynamics.com'
-      PRODUCTION_ENVIRONMENT_URL: 'https://orgdc49fd0d.crm15.dynamics.com'
+      BUILD_ENVIRONMENT_URL: ${{ vars.VAR_DEV }}
+      PRODUCTION_ENVIRONMENT_URL: ${{ vars.VAR_PROD }}
+      # BUILD_ENVIRONMENT_URL: 'https://org5569b62d.crm15.dynamics.com'
+      # PRODUCTION_ENVIRONMENT_URL: 'https://orgdc49fd0d.crm15.dynamics.com'
       # CLIENT_ID: '94e95571-a37c-432e-bae6-1ae9671a4983'
       # TENANT_ID: '302edaf0-65d6-449a-a796-b83cfb733f0d'    
     secrets:
       
       # BUILD_ENVIRONMENT_URL: ${{ secrets.BUILD_ENV }}
       # PRODUCTION_ENVIRONMENT_URL: ${{ secrets.PROD_ENV }}
-      CLIENT_ID: ${{ secrets.CLIENT_ID }}
-      TENANT_ID: ${{ secrets.TENANT_ID }}
+      CLIENT_ID: ${{ vars.VAR_CLIENT }}
+      TENANT_ID: ${{ vars.VAR_TENANT }}
       
       envSecret: ${{ secrets.ENVSECRET }}
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
