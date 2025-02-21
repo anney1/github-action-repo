@@ -10,7 +10,7 @@ permissions:
   contents: write
 jobs:
   Release-solution-gitsol:
-    uses: ./.github/workflows/reuse_calling.yml
+    uses: ./.github/workflows/Solution_Redeploy.yml
     with:
       #You can specify the solution name here
       solution_name: gitsol
