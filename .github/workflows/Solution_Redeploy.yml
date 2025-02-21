@@ -31,14 +31,7 @@ on:
         description: 'Prod Env URL'
         type: string
         required: true
-      # CLIENT_ID:
-      #   description: 'The client id'
-      #   type: string
-      #   required: true
-      # TENANT_ID:
-      #   description: 'The tenant id'
-      #   type: string
-      #   required: true
+
 
     secrets:
       CLIENT_ID:
@@ -69,10 +62,7 @@ jobs:
     - name: Install Power Platform CLI (PAC)
       uses: microsoft/powerplatform-actions/actions-install@v1
   
-    # - name: Authenticate with Power Platform
-    #   run: |
-    #     pac auth create --url ${{ inputs.BUILD_ENVIRONMENT_URL }} --applicationId ${{ secrets.Client_ID }} --clientSecret ${{ secrets.ENVSECRET }} --tenant ${{ secrets.TENANT_ID }}
-      
+    
     - name: Pack solution
       uses: microsoft/powerplatform-actions/pack-solution@main
       with:
@@ -118,7 +108,7 @@ jobs:
 
   
   release-to-staging:
-
+    needs: [ convert-to-managed ]
     runs-on: windows-latest
     env:
       RUNNER_DEBUG: 1
