@@ -1,0 +1,30 @@
+name: Release action
+# Call the reusable workflow release-solution-with-inputs.yml
+# Release your solution to prod when you create a new release.
+
+on:
+  workflow_dispatch:
+  # release:
+  #     types: [created]        
+permissions:
+  contents: write
+jobs:
+  Release-solution-gitsol:
+    uses: ./.github/workflows/reuse_calling.yml
+    with:
+      #You can specify the solution name here
+      solution_name: gitsol
+      # Update your values here
+      BUILD_ENVIRONMENT_URL: 'https://org5569b62d.crm15.dynamics.com'
+      PRODUCTION_ENVIRONMENT_URL: 'https://orgdc49fd0d.crm15.dynamics.com'
+      # CLIENT_ID: '94e95571-a37c-432e-bae6-1ae9671a4983'
+      # TENANT_ID: '302edaf0-65d6-449a-a796-b83cfb733f0d'    
+    secrets:
+      
+      # BUILD_ENVIRONMENT_URL: ${{ secrets.BUILD_ENV }}
+      # PRODUCTION_ENVIRONMENT_URL: ${{ secrets.PROD_ENV }}
+      CLIENT_ID: ${{ secrets.CLIENT_ID }}
+      TENANT_ID: ${{ secrets.TENANT_ID }}
+      
+      envSecret: ${{ secrets.ENVSECRET }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
