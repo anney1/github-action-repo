@@ -1,0 +1,188 @@
+name: release-solution-to-prod-reusable
+
+on:
+  workflow_call:
+    inputs:
+      solution_name:
+        description: 'The solution name.'
+        type: string
+        default: gitsol
+      solution_shipping_folder:
+        description: 'folder name for staging the exported solution *do not change*'
+        type: string
+        default: out/ship/
+      solution_outbound_folder:
+        description: 'staging the unpacked solution folder before check-in *do not change*'
+        type: string
+        default: out/solutions/
+      solution_source_folder:
+        description: 'folder name to be created and checked in *do not change*'
+        type: string
+        default: solutions/
+      solution_release_folder:
+        description: 'folder where the released binaries are going to be hosted *do not change*'
+        type: string
+        default: out/release
+      BUILD_ENVIRONMENT_URL:
+        description: 'Build environment url.'
+        type: string
+        required: true
+      PRODUCTION_ENVIRONMENT_URL:
+        description: 'Prod Env URL'
+        type: string
+        required: true
+      # CLIENT_ID:
+      #   description: 'The client id'
+      #   type: string
+      #   required: true
+      # TENANT_ID:
+      #   description: 'The tenant id'
+      #   type: string
+      #   required: true
+
+    secrets:
+      CLIENT_ID:
+        description: 'The client id'
+        required: true
+      TENANT_ID:
+        description: 'The tenant id'
+        required: true
+      envSecret:
+        description: 'The secret value for authentication using SPN'
+        required: true
+      GH_TOKEN:
+        description: 'GitHub Personal Access Token'
+        required: true
+
+jobs:
+  convert-to-managed:
+    runs-on: windows-latest
+    env:
+      RUNNER_DEBUG: 1
+
+    steps:
+    - name: Checkout main branch for custom actions
+      uses: actions/checkout@v3
+      with:
+        lfs: true
+     
+    - name: Install Power Platform CLI (PAC)
+      uses: microsoft/powerplatform-actions/actions-install@v1
+  
+    # - name: Authenticate with Power Platform
+    #   run: |
+    #     pac auth create --url ${{ inputs.BUILD_ENVIRONMENT_URL }} --applicationId ${{ secrets.Client_ID }} --clientSecret ${{ secrets.ENVSECRET }} --tenant ${{ secrets.TENANT_ID }}
+      
+    - name: Pack solution
+      uses: microsoft/powerplatform-actions/pack-solution@main
+      with:
+        solution-folder: ${{ inputs.solution_source_folder }}/${{ inputs.solution_name }}
+        solution-file: ${{ inputs.solution_outbound_folder }}/${{ inputs.solution_name }}.zip
+        solution-type: Unmanaged
+
+    - name: Import solution as unmanaged to build env
+      uses: microsoft/powerplatform-actions/import-solution@main
+      with:
+
+        # environment-url: 'https://org5569b62d.crm15.dynamics.com'
+        # app-id: '94e95571-a37c-432e-bae6-1ae9671a4983'
+        # client-secret: 'Icm8Q~DW6gqGm1Cn8CO02HaiHTgnYfh_lCla5bU1'
+        # tenant-id: '302edaf0-65d6-449a-a796-b83cfb733f0d'
+        
+        environment-url: ${{ inputs.BUILD_ENVIRONMENT_URL }}
+        app-id: ${{ secrets.CLIENT_ID }}
+        client-secret: ${{ secrets.envSecret }}
+        tenant-id: ${{ secrets.TENANT_ID }}
+      
+        solution-file: ${{ inputs.solution_outbound_folder }}/${{ inputs.solution_name }}.zip
+        force-overwrite: true
+        publish-changes: true
+
+    - name: Export solution as managed
+      uses: microsoft/powerplatform-actions/export-solution@main
+      with:
+        environment-url: ${{ inputs.BUILD_ENVIRONMENT_URL }}
+        app-id: ${{ secrets.CLIENT_ID }}
+        client-secret: ${{ secrets.envSecret }}
+        tenant-id: ${{ secrets.TENANT_ID }}
+  
+        solution-name: ${{ inputs.solution_name }}
+        managed: true
+        solution-output-file: ${{ inputs.solution_shipping_folder }}/${{ inputs.solution_name }}_managed.zip
+
+    - name: Upload the ready to ship solution to GH artifact store
+      uses: actions/upload-artifact@v4
+      with:
+        name: managedSolutions
+        path: ${{ inputs.solution_shipping_folder }}
+
+  wait-for-codeowner-approval:
+    needs: [convert-to-managed]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for CodeOwner Approval
+        id: check-approval
+        run: |
+          PR_NUMBER=$(curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls?head=update-solution-${{ inputs.solution_name }}" \
+            | jq -r '.[0].number')
+
+          echo "Checking approval for PR #$PR_NUMBER"
+
+          while true; do
+            REVIEWS=$(curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/reviews")
+
+            APPROVED=$(echo "$REVIEWS" | jq -r '.[] | select(.state=="APPROVED") | .user.login')
+
+            if [[ ! -z "$APPROVED" ]]; then
+              echo "PR Approved by: $APPROVED"
+              break
+            else
+              echo "Waiting for Code Owner approval..."
+              sleep 30  # Check every 30 seconds
+            fi
+          done
+
+  send-approval-notification:
+    needs: [convert-to-managed]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify CODEOWNER for Approval
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d "{\"body\": \"@CODEOWNERS Approval required for release to production.\"}" \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ env.PR_NUMBER }}/comments"
+
+  
+  release-to-staging:
+    needs: [convert-to-managed, send-approval-notification]
+    runs-on: windows-latest
+    env:
+      RUNNER_DEBUG: 1
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        # lfs: true
+        token: ${{ secrets.GH_TOKEN }}
+    - name: Install Power Platform CLI (PAC)
+      uses: microsoft/powerplatform-actions/actions-install@v1
+    - name: Fetch the ready to ship solution from GH artifact store
+      uses: actions/download-artifact@v4
+      with:
+        name: managedSolutions
+        path: ${{ inputs.solution_release_folder }}
+
+    - name: Import solution to prod env
+      uses: microsoft/powerplatform-actions/import-solution@v1
+      with:
+        environment-url: ${{ inputs.PRODUCTION_ENVIRONMENT_URL }}
+        app-id: ${{ secrets.CLIENT_ID }}
+        client-secret: ${{ secrets.envSecret }}
+        tenant-id: ${{ secrets.TENANT_ID }}
+        solution-file: ${{ inputs.solution_release_folder }}/${{ inputs.solution_name }}_managed.zip
+        force-overwrite: true
+        publish-changes: true
