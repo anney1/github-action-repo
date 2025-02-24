@@ -78,7 +78,7 @@ jobs:
       uses: microsoft/powerplatform-actions/branch-solution@v1  # Use latest available version
       with:
         solution-folder: out/solutions/app_sol
-        solution-target-folder: solutions/app_sol
+        solution-target-folder: solutions/KOM-1-app_sol
         repo-token: ${{ secrets.GH_TOKEN }}
         allow-empty-commit: true
     
