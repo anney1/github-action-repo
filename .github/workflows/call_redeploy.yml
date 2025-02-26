@@ -16,6 +16,7 @@ jobs:
       solution_name: canvas
       # Update your values here
       BUILD_ENVIRONMENT_URL: ${{ vars.VAR_DEV }}
+      PRODUCTION_ENVIRONMENT_URL: ${{ vars.VAR_PROD }}
  
     secrets:
 
