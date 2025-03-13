@@ -31,14 +31,6 @@ on:
         description: 'Prod Env URL'
         type: string
         required: true
-      # CLIENT_ID:
-      #   description: 'The client id'
-      #   type: string
-      #   required: true
-      # TENANT_ID:
-      #   description: 'The tenant id'
-      #   type: string
-      #   required: true
 
     secrets:
       CLIENT_ID:
@@ -68,11 +60,7 @@ jobs:
      
     - name: Install Power Platform CLI (PAC)
       uses: microsoft/powerplatform-actions/actions-install@v1
-  
-    # - name: Authenticate with Power Platform
-    #   run: |
-    #     pac auth create --url ${{ inputs.BUILD_ENVIRONMENT_URL }} --applicationId ${{ secrets.Client_ID }} --clientSecret ${{ secrets.ENVSECRET }} --tenant ${{ secrets.TENANT_ID }}
-      
+
     - name: Pack solution
       uses: microsoft/powerplatform-actions/pack-solution@main
       with:
@@ -84,10 +72,6 @@ jobs:
       uses: microsoft/powerplatform-actions/import-solution@main
       with:
 
-        # environment-url: 'https://org5569b62d.crm15.dynamics.com'
-        # app-id: '94e95571-a37c-432e-bae6-1ae9671a4983'
-        # client-secret: 'Icm8Q~DW6gqGm1Cn8CO02HaiHTgnYfh_lCla5bU1'
-        # tenant-id: '302edaf0-65d6-449a-a796-b83cfb733f0d'
         
         environment-url: ${{ inputs.BUILD_ENVIRONMENT_URL }}
         app-id: ${{ secrets.CLIENT_ID }}
@@ -158,7 +142,7 @@ jobs:
 
   
   release-to-staging:
-    needs: [convert-to-managed, send-approval-notification]
+    needs: [wait-for-codeowner-approval, send-approval-notification]
     runs-on: windows-latest
     env:
       RUNNER_DEBUG: 1
