@@ -160,7 +160,7 @@ jobs:
             "https://api.github.com/repos/${{ github.repository }}/issues/${{ env.PR_NUMBER }}/comments"
 
   release-to-staging:
-    needs: [wait-for-codeowner-approval, send-approval-notification]
+    needs: [convert-to-managed, wait-for-codeowner-approval, send-approval-notification]
     runs-on: windows-latest
     env:
       RUNNER_DEBUG: 1
