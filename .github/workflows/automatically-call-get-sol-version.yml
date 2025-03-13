@@ -42,8 +42,10 @@ jobs:
     with:
       solution_name: ${{ needs.Get-Solution-Name-and-Version.outputs.solution_name }}
       solution_version: ${{ needs.Get-Solution-Name-and-Version.outputs.solution_version }}
-      BUILD_ENVIRONMENT_URL: 'https://org5569b62d.crm15.dynamics.com'
-      PRODUCTION_ENVIRONMENT_URL: 'https://orgdc49fd0d.crm15.dynamics.com'
+      BUILD_ENVIRONMENT_URL: ${{ vars.VAR_DEV }}
+      PRODUCTION_ENVIRONMENT_URL: ${{ vars.VAR_PROD }}
+      # BUILD_ENVIRONMENT_URL: 'https://org5569b62d.crm15.dynamics.com'
+      # PRODUCTION_ENVIRONMENT_URL: 'https://orgdc49fd0d.crm15.dynamics.com'
 
     secrets:
       CLIENT_ID: ${{ secrets.CLIENT_ID }}
