@@ -38,7 +38,7 @@ jobs:
 
   Call-Reusable-Workflow:
     needs: Get-Solution-Name-and-Version
-    uses: ./.github/workflows/reusable-workflow.yml  # Path to the reusable workflow
+    uses: ./.github/workflows/automatically_call-deploy-prod.yml # Path to the reusable workflow
     with:
       solution_name: ${{ needs.Get-Solution-Name-and-Version.outputs.solution_name }}
       solution_version: ${{ needs.Get-Solution-Name-and-Version.outputs.solution_version }}
