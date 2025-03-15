@@ -119,45 +119,45 @@ jobs:
           name: managedSolutions
           path: ${{ inputs.solution_shipping_folder }}
 
-  wait-for-codeowner-approval:
-    needs: [convert-to-managed]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Wait for CodeOwner Approval
-        id: check-approval
-        run: |
-          PR_NUMBER=$(curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/pulls?head=update-solution-${{ needs.Get-Solution-Name-and-Version.outputs.solution_name }}" \
-            | jq -r '.[0].number')
+  # wait-for-codeowner-approval:
+  #   needs: [convert-to-managed]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Wait for CodeOwner Approval
+  #       id: check-approval
+  #       run: |
+  #         PR_NUMBER=$(curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+  #           "https://api.github.com/repos/${{ github.repository }}/pulls?head=update-solution-${{ needs.Get-Solution-Name-and-Version.outputs.solution_name }}" \
+  #           | jq -r '.[0].number')
 
-          echo "Checking approval for PR #$PR_NUMBER"
+  #         echo "Checking approval for PR #$PR_NUMBER"
 
-          while true; do
-            REVIEWS=$(curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-              "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/reviews")
+  #         while true; do
+  #           REVIEWS=$(curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+  #             "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/reviews")
 
-            APPROVED=$(echo "$REVIEWS" | jq -r '.[] | select(.state=="APPROVED") | .user.login')
+  #           APPROVED=$(echo "$REVIEWS" | jq -r '.[] | select(.state=="APPROVED") | .user.login')
 
-            if [[ ! -z "$APPROVED" ]]; then
-              echo "PR Approved by: $APPROVED"
-              break
-            else
-              echo "Waiting for Code Owner approval..."
-              sleep 30  # Check every 30 seconds
-            fi
-          done
+  #           if [[ ! -z "$APPROVED" ]]; then
+  #             echo "PR Approved by: $APPROVED"
+  #             break
+  #           else
+  #             echo "Waiting for Code Owner approval..."
+  #             sleep 30  # Check every 30 seconds
+  #           fi
+  #         done
 
-  send-approval-notification:
-    needs: [convert-to-managed]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Notify CODEOWNER for Approval
-        run: |
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -d "{\"body\": \"@CODEOWNERS Approval required for release to production.\"}" \
-            "https://api.github.com/repos/${{ github.repository }}/issues/${{ env.PR_NUMBER }}/comments"
+  # send-approval-notification:
+  #   needs: [convert-to-managed]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Notify CODEOWNER for Approval
+  #       run: |
+  #         curl -X POST \
+  #           -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+  #           -H "Accept: application/vnd.github.v3+json" \
+  #           -d "{\"body\": \"@CODEOWNERS Approval required for release to production.\"}" \
+  #           "https://api.github.com/repos/${{ github.repository }}/issues/${{ env.PR_NUMBER }}/comments"
 
   release-to-staging:
     needs: [convert-to-managed, wait-for-codeowner-approval, send-approval-notification]
