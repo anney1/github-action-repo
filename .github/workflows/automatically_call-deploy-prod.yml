@@ -1,49 +1,40 @@
-name: automatically call sol, build and deploy
+name: Automatically Call, Build, and Deploy Solution
 
 on:
   workflow_call:
     inputs:
-      solution_shipping_folder:
-        description: 'folder name for staging the exported solution *do not change*'
+      solution_name:
+        description: 'Name of the solution to deploy.'
+        required: true
         type: string
-        default: out/ship/
-      solution_outbound_folder:
-        description: 'staging the unpacked solution folder before check-in *do not change*'
+      solution_version:
+        description: 'Version of the solution to deploy.'
+        required: true
         type: string
-        default: out/solutions/
-      solution_source_folder:
-        description: 'folder name to be created and checked in *do not change*'
-        type: string
-        default: solutions/
-      solution_release_folder:
-        description: 'folder where the released binaries are going to be hosted *do not change*'
-        type: string
-        default: out/release
       BUILD_ENVIRONMENT_URL:
-        description: 'Build environment url.'
-        type: string
+        description: 'Build environment URL.'
         required: true
+        type: string
       PRODUCTION_ENVIRONMENT_URL:
-        description: 'Prod Env URL'
-        type: string
+        description: 'Production environment URL.'
         required: true
-
+        type: string
     secrets:
       CLIENT_ID:
-        description: 'The client id'
+        description: 'The client ID.'
         required: true
       TENANT_ID:
-        description: 'The tenant id'
+        description: 'The tenant ID.'
         required: true
       envSecret:
-        description: 'The secret value for authentication using SPN'
+        description: 'The secret value for authentication using SPN.'
         required: true
       GH_TOKEN:
-        description: 'GitHub Personal Access Token'
+        description: 'GitHub Personal Access Token.'
         required: true
 
 jobs:
-  process-jira-issue:
+  Get-Solution-Name-and-Version:
     runs-on: ubuntu-latest
     outputs:
       solution_name: ${{ steps.get-solution-name.outputs.solution_name }}
@@ -57,7 +48,7 @@ jobs:
         id: get-solution-name
         run: |
           # Example: Extract solution name from a file (e.g., solution.json)
-          SOLUTION_NAME=$(jq -r '.name' ${{ inputs.solution_source_folder }}/solution.json)
+          SOLUTION_NAME=$(jq -r '.name' solutions/solution.json)
           echo "Solution Name: $SOLUTION_NAME"
           echo "solution_name=$SOLUTION_NAME" >> $GITHUB_OUTPUT
 
@@ -70,7 +61,7 @@ jobs:
           echo "solution_version=$VERSION" >> $GITHUB_OUTPUT
 
   convert-to-managed:
-    needs: process-jira-issue
+    needs: Get-Solution-Name-and-Version
     runs-on: windows-latest
     env:
       RUNNER_DEBUG: 1
@@ -87,8 +78,8 @@ jobs:
       - name: Pack solution
         uses: microsoft/powerplatform-actions/pack-solution@main
         with:
-          solution-folder: ${{ inputs.solution_source_folder }}/${{ needs.process-jira-issue.outputs.solution_name }}
-          solution-file: ${{ inputs.solution_outbound_folder }}/${{ needs.process-jira-issue.outputs.solution_name }}.zip
+          solution-folder: solutions/${{ needs.Get-Solution-Name-and-Version.outputs.solution_name }}
+          solution-file: out/solutions/${{ needs.Get-Solution-Name-and-Version.outputs.solution_name }}.zip
           solution-type: Unmanaged
 
       - name: Import solution as unmanaged to build env
@@ -98,7 +89,7 @@ jobs:
           app-id: ${{ secrets.CLIENT_ID }}
           client-secret: ${{ secrets.envSecret }}
           tenant-id: ${{ secrets.TENANT_ID }}
-          solution-file: ${{ inputs.solution_outbound_folder }}/${{ needs.process-jira-issue.outputs.solution_name }}.zip
+          solution-file: out/solutions/${{ needs.Get-Solution-Name-and-Version.outputs.solution_name }}.zip
           force-overwrite: true
           publish-changes: true
 
@@ -109,58 +100,18 @@ jobs:
           app-id: ${{ secrets.CLIENT_ID }}
           client-secret: ${{ secrets.envSecret }}
           tenant-id: ${{ secrets.TENANT_ID }}
-          solution-name: ${{ needs.process-jira-issue.outputs.solution_name }}
+          solution-name: ${{ needs.Get-Solution-Name-and-Version.outputs.solution_name }}
           managed: true
-          solution-output-file: ${{ inputs.solution_shipping_folder }}/${{ needs.process-jira-issue.outputs.solution_name }}_${{ needs.process-jira-issue.outputs.solution_version }}_managed.zip
+          solution-output-file: out/ship/${{ needs.Get-Solution-Name-and-Version.outputs.solution_name }}_${{ needs.Get-Solution-Name-and-Version.outputs.solution_version }}_managed.zip
 
-      - name: Upload the ready to ship solution to GH artifact store
+      - name: Upload the ready-to-ship solution to GH artifact store
         uses: actions/upload-artifact@v4
         with:
           name: managedSolutions
-          path: ${{ inputs.solution_shipping_folder }}
+          path: out/ship/
 
-  # wait-for-codeowner-approval:
-  #   needs: [convert-to-managed]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Wait for CodeOwner Approval
-  #       id: check-approval
-  #       run: |
-  #         PR_NUMBER=$(curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-  #           "https://api.github.com/repos/${{ github.repository }}/pulls?head=update-solution-${{ needs.process-jira-issue.outputs.solution_name }}" \
-  #           | jq -r '.[0].number')
-
-  #         echo "Checking approval for PR #$PR_NUMBER"
-
-  #         while true; do
-  #           REVIEWS=$(curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-  #             "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/reviews")
-
-  #           APPROVED=$(echo "$REVIEWS" | jq -r '.[] | select(.state=="APPROVED") | .user.login')
-
-  #           if [[ ! -z "$APPROVED" ]]; then
-  #             echo "PR Approved by: $APPROVED"
-  #             break
-  #           else
-  #             echo "Waiting for Code Owner approval..."
-  #             sleep 30  # Check every 30 seconds
-  #           fi
-  #         done
-
-  # send-approval-notification:
-  #   needs: [convert-to-managed]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Notify CODEOWNER for Approval
-  #       run: |
-  #         curl -X POST \
-  #           -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-  #           -H "Accept: application/vnd.github.v3+json" \
-  #           -d "{\"body\": \"@CODEOWNERS Approval required for release to production.\"}" \
-  #           "https://api.github.com/repos/${{ github.repository }}/issues/${{ env.PR_NUMBER }}/comments"
-
-  release-to-staging:
-    needs: [convert-to-managed]
+  release-to-production:
+    needs: convert-to-managed
     runs-on: windows-latest
     env:
       RUNNER_DEBUG: 1
@@ -173,19 +124,19 @@ jobs:
       - name: Install Power Platform CLI (PAC)
         uses: microsoft/powerplatform-actions/actions-install@v1
 
-      - name: Fetch the ready to ship solution from GH artifact store
+      - name: Fetch the ready-to-ship solution from GH artifact store
         uses: actions/download-artifact@v4
         with:
           name: managedSolutions
-          path: ${{ inputs.solution_release_folder }}
+          path: out/release/
 
-      - name: Import solution to prod env
+      - name: Import solution to production environment
         uses: microsoft/powerplatform-actions/import-solution@v1
         with:
           environment-url: ${{ inputs.PRODUCTION_ENVIRONMENT_URL }}
           app-id: ${{ secrets.CLIENT_ID }}
           client-secret: ${{ secrets.envSecret }}
           tenant-id: ${{ secrets.TENANT_ID }}
-          solution-file: ${{ inputs.solution_release_folder }}/${{ needs.process-jira-issue.outputs.solution_name }}_${{ needs.process-jira-issue.outputs.solution_version }}_managed.zip
+          solution-file: out/release/${{ needs.Get-Solution-Name-and-Version.outputs.solution_name }}_${{ needs.Get-Solution-Name-and-Version.outputs.solution_version }}_managed.zip
           force-overwrite: true
           publish-changes: true
