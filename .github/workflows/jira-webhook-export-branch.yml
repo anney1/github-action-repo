@@ -166,7 +166,7 @@ jobs:
 
   deploy-to-production:
     needs: merge-pr
-    uses: ./.github/workflows/automatically_deploy-prod.yml
+    uses: ./.github/workflows/automatically_call-deploy-prod.yml
     with:
       solution_name: ${{ needs.process-jira-issue.outputs.solution_name }}
       solution_version: ${{ needs.process-jira-issue.outputs.solution_version }}
