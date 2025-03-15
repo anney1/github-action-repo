@@ -43,7 +43,7 @@ on:
         required: true
 
 jobs:
-  Get-Solution-Name-and-Version:
+  process-jira-issue:
     runs-on: ubuntu-latest
     outputs:
       solution_name: ${{ steps.get-solution-name.outputs.solution_name }}
@@ -70,7 +70,7 @@ jobs:
           echo "solution_version=$VERSION" >> $GITHUB_OUTPUT
 
   convert-to-managed:
-    needs: Get-Solution-Name-and-Version
+    needs: process-jira-issue
     runs-on: windows-latest
     env:
       RUNNER_DEBUG: 1
@@ -87,8 +87,8 @@ jobs:
       - name: Pack solution
         uses: microsoft/powerplatform-actions/pack-solution@main
         with:
-          solution-folder: ${{ inputs.solution_source_folder }}/${{ needs.Get-Solution-Name-and-Version.outputs.solution_name }}
-          solution-file: ${{ inputs.solution_outbound_folder }}/${{ needs.Get-Solution-Name-and-Version.outputs.solution_name }}.zip
+          solution-folder: ${{ inputs.solution_source_folder }}/${{ needs.process-jira-issue.outputs.solution_name }}
+          solution-file: ${{ inputs.solution_outbound_folder }}/${{ needs.process-jira-issue.outputs.solution_name }}.zip
           solution-type: Unmanaged
 
       - name: Import solution as unmanaged to build env
@@ -98,7 +98,7 @@ jobs:
           app-id: ${{ secrets.CLIENT_ID }}
           client-secret: ${{ secrets.envSecret }}
           tenant-id: ${{ secrets.TENANT_ID }}
-          solution-file: ${{ inputs.solution_outbound_folder }}/${{ needs.Get-Solution-Name-and-Version.outputs.solution_name }}.zip
+          solution-file: ${{ inputs.solution_outbound_folder }}/${{ needs.process-jira-issue.outputs.solution_name }}.zip
           force-overwrite: true
           publish-changes: true
 
@@ -109,9 +109,9 @@ jobs:
           app-id: ${{ secrets.CLIENT_ID }}
           client-secret: ${{ secrets.envSecret }}
           tenant-id: ${{ secrets.TENANT_ID }}
-          solution-name: ${{ needs.Get-Solution-Name-and-Version.outputs.solution_name }}
+          solution-name: ${{ needs.process-jira-issue.outputs.solution_name }}
           managed: true
-          solution-output-file: ${{ inputs.solution_shipping_folder }}/${{ needs.Get-Solution-Name-and-Version.outputs.solution_name }}_${{ needs.Get-Solution-Name-and-Version.outputs.solution_version }}_managed.zip
+          solution-output-file: ${{ inputs.solution_shipping_folder }}/${{ needs.process-jira-issue.outputs.solution_name }}_${{ needs.process-jira-issue.outputs.solution_version }}_managed.zip
 
       - name: Upload the ready to ship solution to GH artifact store
         uses: actions/upload-artifact@v4
@@ -127,7 +127,7 @@ jobs:
   #       id: check-approval
   #       run: |
   #         PR_NUMBER=$(curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-  #           "https://api.github.com/repos/${{ github.repository }}/pulls?head=update-solution-${{ needs.Get-Solution-Name-and-Version.outputs.solution_name }}" \
+  #           "https://api.github.com/repos/${{ github.repository }}/pulls?head=update-solution-${{ needs.process-jira-issue.outputs.solution_name }}" \
   #           | jq -r '.[0].number')
 
   #         echo "Checking approval for PR #$PR_NUMBER"
@@ -160,7 +160,7 @@ jobs:
   #           "https://api.github.com/repos/${{ github.repository }}/issues/${{ env.PR_NUMBER }}/comments"
 
   release-to-staging:
-    needs: [convert-to-managed, wait-for-codeowner-approval, send-approval-notification]
+    needs: [convert-to-managed]
     runs-on: windows-latest
     env:
       RUNNER_DEBUG: 1
@@ -186,6 +186,6 @@ jobs:
           app-id: ${{ secrets.CLIENT_ID }}
           client-secret: ${{ secrets.envSecret }}
           tenant-id: ${{ secrets.TENANT_ID }}
-          solution-file: ${{ inputs.solution_release_folder }}/${{ needs.Get-Solution-Name-and-Version.outputs.solution_name }}_${{ needs.Get-Solution-Name-and-Version.outputs.solution_version }}_managed.zip
+          solution-file: ${{ inputs.solution_release_folder }}/${{ needs.process-jira-issue.outputs.solution_name }}_${{ needs.process-jira-issue.outputs.solution_version }}_managed.zip
           force-overwrite: true
           publish-changes: true
