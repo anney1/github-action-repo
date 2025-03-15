@@ -43,6 +43,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: List repository contents
+        run: ls -R
+
+      - name: Check if Solution.xml exists
+        run: |
+          if [ -f "solutions/TestSolution/Other/Solution.xml" ]; then
+            echo "Solution.xml exists."
+          else
+            echo "Solution.xml does not exist."
+            exit 1
+          fi
+
       - name: Install xmllint
         run: |
           sudo apt-get update
@@ -51,7 +63,6 @@ jobs:
       - name: Extract solution name from Solution.xml
         id: get-solution-name
         run: |
-          # Extract the solution name from Solution.xml using xmllint
           SOLUTION_NAME=$(xmllint --xpath "string(//UniqueName)" solutions/TestSolution/Other/Solution.xml)
           echo "Solution Name: $SOLUTION_NAME"
           echo "solution_name=$SOLUTION_NAME" >> $GITHUB_OUTPUT
@@ -59,7 +70,6 @@ jobs:
       - name: Generate version number
         id: generate-version
         run: |
-          # Example: Generate a semantic version (e.g., 1.0.0)
           VERSION=$(date +%Y.%m.%d.%H%M%S)  # Use timestamp as version
           echo "Generated Version: $VERSION"
           echo "solution_version=$VERSION" >> $GITHUB_OUTPUT
