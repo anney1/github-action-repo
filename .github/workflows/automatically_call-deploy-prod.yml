@@ -39,16 +39,15 @@ jobs:
     outputs:
       solution_name: ${{ steps.get-solution-name.outputs.solution_name }}
       solution_version: ${{ steps.generate-version.outputs.solution_version }}
-
     steps:
-      - name: Checkout main branch
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Extract solution name
+      - name: Extract solution name from Solution.xml
         id: get-solution-name
         run: |
-          # Example: Extract solution name from a file (e.g., solution.json)
-          SOLUTION_NAME=$(jq -r '.name' solutions/solution.json)
+          # Extract the solution name from Solution.xml using xmllint
+          SOLUTION_NAME=$(xmllint --xpath "string(//UniqueName)" solutions/TestSolution/Other/Solution.xml)
           echo "Solution Name: $SOLUTION_NAME"
           echo "solution_name=$SOLUTION_NAME" >> $GITHUB_OUTPUT
 
